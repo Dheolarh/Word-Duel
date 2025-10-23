@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "devvit-mcp": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "--cache",
+        "C:\\temp\\npx-cache",
+        "@devvit/mcp"
+      ],
+      "env": {
+        "NPM_CONFIG_CACHE": "C:\\temp\\npm-cache"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "devvit_search"
+      ]
+    }
+  }
+}
