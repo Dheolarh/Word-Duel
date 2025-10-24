@@ -2,9 +2,10 @@ interface GuessRowProps {
   guess: string;
   feedback?: ('correct' | 'present' | 'absent')[];
   wordLength: number;
+  isInvalid?: boolean;
 }
 
-export function GuessRow({ guess, feedback, wordLength }: GuessRowProps) {
+export function GuessRow({ guess, feedback, wordLength, isInvalid = false }: GuessRowProps) {
   const letters = guess.padEnd(wordLength, ' ').split('');
 
   return (
@@ -15,7 +16,11 @@ export function GuessRow({ guess, feedback, wordLength }: GuessRowProps) {
         let borderColor = 'border-[#4a9b3c]';
         let textColor = 'text-[#2d5016]';
 
-        if (status === 'correct') {
+        if (isInvalid) {
+          bgColor = 'bg-red-500';
+          borderColor = 'border-red-500';
+          textColor = 'text-white';
+        } else if (status === 'correct') {
           bgColor = 'bg-[#6aaa64]';
           borderColor = 'border-[#6aaa64]';
           textColor = 'text-white';

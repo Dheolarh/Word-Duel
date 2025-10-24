@@ -16,15 +16,7 @@
     "dir": "assets"
   },
   "permissions": {
-    "redis": true,
-    "http": {
-      "domains": [
-        "api.dictionaryapi.dev",
-        "freedictionaryapi.com",
-        "api.wordnik.com",
-        "api.merriam-webster.com"
-      ]
-    }
+    "redis": true
   },
   "menu": {
     "items": [

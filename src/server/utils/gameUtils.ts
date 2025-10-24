@@ -100,7 +100,17 @@ export function isGameEnded(gameState: GameState): boolean {
   const player1ExceededAttempts = gameState.player1.guesses.length >= player1MaxAttempts;
   const player2ExceededAttempts = gameState.player2.guesses.length >= player2MaxAttempts;
   
-  // Game ends if both players have exceeded their attempts
+  // For single player mode: game ends if human player (non-AI) reaches max attempts
+  // In single player, player1 is human, player2 is AI
+  if (gameState.mode === 'single') {
+    const humanPlayer = gameState.player1.isAI ? gameState.player2 : gameState.player1;
+    const humanMaxAttempts = getMaxAttempts(humanPlayer.difficulty);
+    const humanExceededAttempts = humanPlayer.guesses.length >= humanMaxAttempts;
+    
+    if (humanExceededAttempts) return true;
+  }
+  
+  // For multiplayer: game ends if both players have exceeded their attempts
   return player1ExceededAttempts && player2ExceededAttempts;
 }
 
@@ -133,7 +143,31 @@ export function determineWinner(gameState: GameState): 'player1' | 'player2' | '
   if (player1Won) return 'player1';
   if (player2Won) return 'player2';
   
-  return 'draw'; // Time expired with no winner
+  // Check if game ended due to max attempts (only for human player)
+  if (gameState.mode === 'single') {
+    const humanPlayer = gameState.player1.isAI ? gameState.player2 : gameState.player1;
+    const aiPlayer = gameState.player1.isAI ? gameState.player1 : gameState.player2;
+    
+    const getMaxAttempts = (difficulty?: 'easy' | 'medium' | 'difficult'): number => {
+      switch (difficulty) {
+        case 'easy': return Infinity;
+        case 'medium': return 15;
+        case 'difficult': return 10;
+        default: return Infinity;
+      }
+    };
+    
+    const humanMaxAttempts = getMaxAttempts(humanPlayer.difficulty);
+    const humanExceededAttempts = humanPlayer.guesses.length >= humanMaxAttempts;
+    
+    // If human player exceeded attempts without winning, AI wins (player loses)
+    if (humanExceededAttempts && !player1Won && !player2Won) {
+      return aiPlayer.id === gameState.player1.id ? 'player1' : 'player2';
+    }
+  }
+  
+  // Time expired with no winner - draw
+  return 'draw';
 }
 
 /**

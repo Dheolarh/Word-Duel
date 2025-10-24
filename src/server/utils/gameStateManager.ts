@@ -8,6 +8,7 @@ import { RedisDataAccess } from '../main';
 import { generateGameId, createPlayerState, createGameState, isGameEnded, determineWinner } from './gameUtils';
 import { createGuessResult, calculatePoints, calculateCoins } from './gameLogic';
 import { AIOpponentManager } from './aiOpponent';
+import { getDefinition } from '../services/dictionaryApi';
 
 export class GameStateManager {
   /**
@@ -111,19 +112,32 @@ export class GameStateManager {
     if (isGameEnded(gameState)) {
       gameState.status = 'finished';
       gameState.winner = determineWinner(gameState);
+      
+      // Add definitions for both players' secret words
+      gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+      gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+      
       await RedisDataAccess.saveGameState(gameId, gameState);
       throw new Error('Game has already ended');
     }
     
+    // TURN-BASED: Check if it's this player's turn
+    if (gameState.currentPlayer !== playerId) {
+      throw new Error('Not your turn');
+    }
+    
     // Determine which player is making the guess and get opponent's secret word
     let currentPlayer: PlayerState;
+    let opponentPlayer: PlayerState;
     let opponentSecretWord: string;
     
     if (gameState.player1.id === playerId) {
       currentPlayer = gameState.player1;
+      opponentPlayer = gameState.player2;
       opponentSecretWord = gameState.player2.secretWord;
     } else if (gameState.player2.id === playerId) {
       currentPlayer = gameState.player2;
+      opponentPlayer = gameState.player1;
       opponentSecretWord = gameState.player1.secretWord;
     } else {
       throw new Error('Player not found in this game');
@@ -135,12 +149,19 @@ export class GameStateManager {
     // Add guess to player's guess history
     currentPlayer.guesses.push(guessResult);
     
+    // TURN-BASED: Switch to opponent's turn after successful guess
+    gameState.currentPlayer = opponentPlayer.id;
+    
     // Check if game has ended
     const gameEnded = isGameEnded(gameState);
     
     if (gameEnded) {
       gameState.status = 'finished';
       gameState.winner = determineWinner(gameState);
+      
+      // Add definitions for both players' secret words
+      gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+      gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
       
       // Update user statistics and points
       await this.updateGameEndStatistics(gameState);
@@ -292,6 +313,12 @@ export class GameStateManager {
       return null; // No AI player found
     }
     
+    // TURN-BASED: Check if it's AI's turn
+    if (gameState.currentPlayer !== aiPlayer.id) {
+      console.log(`AI guess skipped - not AI's turn. Current turn: ${gameState.currentPlayer}`);
+      return null;
+    }
+    
     // Check if AI should make a guess
     if (!AIOpponentManager.shouldAIMakeGuess(aiPlayer.guesses, aiPlayer.difficulty!)) {
       return null;
@@ -317,12 +344,19 @@ export class GameStateManager {
     // Add guess to AI player's history
     aiPlayer.guesses.push(guessResult);
     
+    // TURN-BASED: Switch turn back to human player
+    gameState.currentPlayer = humanPlayer.id;
+    
     // Check if game has ended
     const gameEnded = isGameEnded(gameState);
     
     if (gameEnded) {
       gameState.status = 'finished';
       gameState.winner = determineWinner(gameState);
+      
+      // Add definitions for both players' secret words
+      gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+      gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
       
       // Clean up AI strategy
       AIOpponentManager.cleanupAIStrategy(gameId);

@@ -17,6 +17,7 @@ export interface PlayerState {
   id: string;
   username: string;
   secretWord: string;
+  secretWordDefinition?: string; // Definition of the secret word (populated when game ends)
   guesses: GuessResult[];
   isAI: boolean;
   difficulty?: 'easy' | 'medium' | 'difficult';

@@ -10,6 +10,7 @@ import logo from '../assets/themes/Default/Logo.webp';
 import leaderboardIcon from '../assets/themes/Default/LeaderboardButton.webp';
 import settingsIcon from '../assets/themes/Default/Settings.webp';
 import musicIcon from '../assets/themes/Default/Music.webp';
+import tutorialIcon from '../assets/themes/Default/Tutorial.webp';
 import playIcon from '../assets/themes/Default/PlayButton.webp';
 import playGameText from '../assets/themes/Default/PlayGameText.webp';
 import leaderboardHeader from '../assets/themes/Default/Leaderboard.webp';
@@ -22,6 +23,7 @@ interface DashboardProps {
 export function Dashboard({ onPlay }: DashboardProps) {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   const [settingsMode, setSettingsMode] = useState<'themes' | 'music'>('themes');
   const [selectedTheme, setSelectedTheme] = useState<'green' | 'halloween'>('green');
   const { settings, toggleBackgroundMusic, toggleSoundEffects } = useAudio();
@@ -123,9 +125,9 @@ export function Dashboard({ onPlay }: DashboardProps) {
 
   return (
     <div className="w-full h-screen flex flex-col p-2 overflow-hidden">
-      {/* Top bar with Settings, Music and Leaderboard */}
+      {/* Top bar with Settings, Music, Leaderboard and Tutorial */}
       <div className="flex justify-between items-start mb-auto">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <SoundButton
             onClick={() => {
               setSettingsMode('themes');
@@ -147,12 +149,21 @@ export function Dashboard({ onPlay }: DashboardProps) {
           </SoundButton>
         </div>
 
-        <SoundButton
-          onClick={() => setShowLeaderboard(true)}
-          className="w-10 h-10 hover:scale-105 transition-transform"
-        >
-          <img src={leaderboardIcon} alt="Leaderboard" className="w-full h-full" />
-        </SoundButton>
+        <div className="flex flex-col gap-2">
+          <SoundButton
+            onClick={() => setShowLeaderboard(true)}
+            className="w-10 h-10 hover:scale-105 transition-transform"
+          >
+            <img src={leaderboardIcon} alt="Leaderboard" className="w-full h-full" />
+          </SoundButton>
+          
+          <SoundButton
+            onClick={() => setShowTutorial(true)}
+            className="w-10 h-10 hover:scale-105 transition-transform"
+          >
+            <img src={tutorialIcon} alt="Tutorial" className="w-full h-full" />
+          </SoundButton>
+        </div>
       </div>
 
       {/* Center content */}
@@ -180,6 +191,32 @@ export function Dashboard({ onPlay }: DashboardProps) {
                   <span className="text-sm text-[#2d5016]">{entry.points}</span>
                 </div>
               ))}
+            </div>
+          </Modal>
+        )}
+
+        {showTutorial && (
+          <Modal headerImage={tutorialIcon} onClose={() => setShowTutorial(false)}>
+            <div className="space-y-3 px-2 text-[#2d5016]">
+              <div className="text-center">
+                <h3 className="text-lg font-bold mb-2">How to Play Word Duel</h3>
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <p><strong>🎯 Objective:</strong> Guess your opponent's secret word before they guess yours!</p>
+                
+                <p><strong>🎮 Gameplay:</strong></p>
+                <ul className="list-disc list-inside ml-2 space-y-1">
+                  <li>Enter a valid word of the correct length</li>
+                  <li>Green letters are in the correct position</li>
+                  <li>Yellow letters are in the word but wrong position</li>
+                  <li>Red letters are not in the word at all</li>
+                </ul>
+                
+                <p><strong>⏱️ Time Limit:</strong> Race against the clock to solve the puzzle!</p>
+                
+                <p><strong>🏆 Winning:</strong> First to guess the opponent's word wins. If time runs out, whoever has made more progress wins!</p>
+              </div>
             </div>
           </Modal>
         )}
@@ -223,17 +260,19 @@ export function Dashboard({ onPlay }: DashboardProps) {
                 </button>
               </div>
             ) : (
-              <div className="space-y-4 px-2">
-                <Toggle
-                  enabled={settings.backgroundMusicEnabled}
-                  onToggle={toggleBackgroundMusic}
-                  label="Background Music"
-                />
-                <Toggle
-                  enabled={settings.soundEffectsEnabled}
-                  onToggle={toggleSoundEffects}
-                  label="Sound Effects"
-                />
+              <div className="px-4 py-3">
+                <div className="space-y-6">
+                  <Toggle
+                    enabled={settings.backgroundMusicEnabled}
+                    onToggle={toggleBackgroundMusic}
+                    label="Background Music"
+                  />
+                  <Toggle
+                    enabled={settings.soundEffectsEnabled}
+                    onToggle={toggleSoundEffects}
+                    label="Sound Effects"
+                  />
+                </div>
               </div>
             )}
           </Modal>

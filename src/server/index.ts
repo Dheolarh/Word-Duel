@@ -4,10 +4,17 @@ import { redis, reddit, createServer, context, getServerPort } from '@devvit/web
 import { createPost } from './core/post';
 import { RedisDataAccess, formatResponse } from './main';
 import { isValidWordFormat } from './utils/gameUtils';
-import { validateWordWithDictionary, validateWordOffline } from './services/dictionaryApi';
+import { validateWordWithDictionary } from './services/dictionaryApi';
 import { GameStateManager } from './utils/gameStateManager';
+import { initializeWordLists } from './utils/aiOpponent';
 
 const app = express();
+
+// Initialize AI word lists asynchronously (don't block server startup)
+initializeWordLists().catch(error => {
+  console.error('Failed to initialize AI word lists:', error);
+  console.log('AI will use fallback word lists');
+});
 
 // Middleware for JSON body parsing
 app.use(express.json());
@@ -154,43 +161,21 @@ router.post('/api/validate-word', async (req, res) => {
       ));
     }
     
-    // Validate word using dictionary APIs
-    try {
-      const validationResult = await validateWordWithDictionary(normalizedWord);
-      
-      if (validationResult.isValid) {
-        res.json(formatResponse({ 
-          valid: true, 
-          word: validationResult.word 
-        }));
-      } else {
-        // Word not found in dictionary
-        res.status(400).json(formatResponse(
-          undefined,
-          `${normalizedWord} doesn't appear in the dictionary`,
-          'VALIDATION_ERROR'
-        ));
-      }
-    } catch (networkError) {
-      // Network error occurred, try offline validation as fallback
-      console.warn('Dictionary API network error, using offline validation:', networkError);
-      
-      const offlineResult = validateWordOffline(normalizedWord);
-      
-      if (offlineResult.isValid) {
-        res.json(formatResponse({ 
-          valid: true, 
-          word: offlineResult.word 
-        }));
-      } else {
-        // Return network error to client for proper error handling
-        res.status(503).json(formatResponse(
-          undefined,
-          'Network error during word validation. Please try again.',
-          'NETWORK_ERROR',
-          true
-        ));
-      }
+    // Validate word using local JSON dictionary
+    const validationResult = await validateWordWithDictionary(normalizedWord);
+
+    if (validationResult.isValid) {
+      res.json(formatResponse({
+        valid: true,
+        word: validationResult.word
+      }));
+    } else {
+      // Word not found in dictionary
+      res.status(400).json(formatResponse(
+        undefined,
+        `${normalizedWord} doesn't appear in the dictionary`,
+        'VALIDATION_ERROR'
+      ));
     }
     
   } catch (error) {
@@ -228,29 +213,15 @@ router.post('/api/submit-guess', async (req, res) => {
       ));
     }
     
-    // Validate word using dictionary APIs
-    try {
-      const validationResult = await validateWordWithDictionary(normalizedGuess);
-      
-      if (!validationResult.isValid) {
-        return res.status(400).json(formatResponse(
-          undefined,
-          `${normalizedGuess} doesn't appear in the dictionary`,
-          'VALIDATION_ERROR'
-        ));
-      }
-    } catch (networkError) {
-      // Try offline validation as fallback
-      const offlineResult = validateWordOffline(normalizedGuess);
-      
-      if (!offlineResult.isValid) {
-        return res.status(503).json(formatResponse(
-          undefined,
-          'Network error during word validation. Please try again.',
-          'NETWORK_ERROR',
-          true
-        ));
-      }
+    // Validate word using local JSON dictionary
+    const validationResult = await validateWordWithDictionary(normalizedGuess);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        `${normalizedGuess} doesn't appear in the dictionary`,
+        'VALIDATION_ERROR'
+      ));
     }
     
     // Validate game access
@@ -289,6 +260,14 @@ router.post('/api/submit-guess', async (req, res) => {
         return res.status(400).json(formatResponse(
           undefined,
           error.message,
+          'GAME_ERROR'
+        ));
+      }
+      
+      if (error.message === 'Not your turn') {
+        return res.status(400).json(formatResponse(
+          undefined,
+          'Not your turn - please wait for opponent',
           'GAME_ERROR'
         ));
       }

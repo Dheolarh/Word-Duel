@@ -8,6 +8,7 @@ import { Board } from '../components/Board';
 import { Keyboard } from '../components/Keyboard';
 import { EnemyGuessRow } from '../components/EnemyGuessRow';
 import { EndGameModal } from '../components/EndGameModal';
+import { WaitingModal } from '../components/WaitingModal';
 import { GameState } from '../../shared/types/game';
 import { ApiResponse, SubmitGuessResponse, GetGameStateResponse } from '../../shared/types/api';
 import pauseBtn from '../assets/themes/Default/Pause.webp';
@@ -42,14 +43,18 @@ export function Game({
   );
   const [isPaused, setIsPaused] = useState(false);
   const [isSubmittingGuess, setIsSubmittingGuess] = useState(false);
-  const aiTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [invalidWord, setInvalidWord] = useState<string>('');
+  const [showInvalidWord, setShowInvalidWord] = useState(false);
+  const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(false);
   const gameStatePollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Player info
   const playerName = 'You';
   const opponentName = isMultiplayer ? 'Opponent' : 'AI';
-  const currentPlayer = gameState?.player1.id === 'current-user' ? gameState.player1 : gameState?.player2;
-  const opponentPlayer = gameState?.player1.id === 'current-user' ? gameState.player2 : gameState?.player1;
+  
+  // Determine current player and opponent based on who is AI
+  const currentPlayer = gameState?.player1.isAI ? gameState.player2 : gameState.player1;
+  const opponentPlayer = gameState?.player1.isAI ? gameState.player1 : gameState.player2;
 
   // Convert server feedback format to client format
   const convertFeedback = (feedback: ('green' | 'yellow' | 'red')[]): ('correct' | 'present' | 'absent')[] => {
@@ -76,6 +81,7 @@ export function Game({
 
   // Get opponent's secret word (only shown when game is finished)
   const opponentWord = gameState?.status === 'finished' ? opponentPlayer?.secretWord || '' : '';
+  const opponentWordDefinition = gameState?.status === 'finished' ? opponentPlayer?.secretWordDefinition || 'a word' : 'a word';
 
   // Update keyboard feedback
   const updateKeyFeedback = (guess: string, feedback: ('correct' | 'present' | 'absent')[]) => {
@@ -159,18 +165,37 @@ export function Game({
     }
   };
 
-  // Poll for game state updates (for AI moves and multiplayer)
+  // Poll for game state updates and trigger AI moves when it's AI's turn
   const pollGameState = async () => {
     try {
       const response = await fetch(`/api/get-game-state/${gameId}?playerId=current-user`);
       const data: GetGameStateResponse = await response.json();
 
       if (data.success && data.data) {
-        setGameState(data.data.gameState);
+        const newGameState = data.data.gameState;
+        setGameState(newGameState);
         
         // Check if game ended
-        if (data.data.gameState.status === 'finished') {
-          updateGameStatus(data.data.gameState);
+        if (newGameState.status === 'finished') {
+          updateGameStatus(newGameState);
+          setIsWaitingForOpponent(false);
+          return;
+        }
+        
+        // TURN-BASED: Check if it's AI's turn and trigger AI guess
+        if (!isMultiplayer && newGameState.status === 'active') {
+          const aiPlayer = newGameState.player1.isAI ? newGameState.player1 : newGameState.player2;
+          
+          // If it's AI's turn and we're not already waiting for AI
+          if (newGameState.currentPlayer === aiPlayer.id && !isWaitingForOpponent) {
+            setIsWaitingForOpponent(true);
+            triggerAIGuess();
+          }
+          
+          // If it's player's turn, clear waiting state
+          if (newGameState.currentPlayer === currentPlayer.id) {
+            setIsWaitingForOpponent(false);
+          }
         }
       }
     } catch (error) {
@@ -178,80 +203,111 @@ export function Game({
     }
   };
 
-  // Schedule AI guess
-  const scheduleAIGuess = async () => {
+  // Trigger AI guess immediately (only called when it's AI's turn)
+  const triggerAIGuess = async () => {
     if (!difficulty || isMultiplayer) return;
-
+    
     try {
-      // Get AI timing
+      // Get AI timing for realistic delay
       const timingResponse = await fetch(`/api/ai-timing/${difficulty}`);
       const timingData: ApiResponse<{ timing: number }> = await timingResponse.json();
       
-      if (timingData.success && timingData.data) {
-        aiTimerRef.current = setTimeout(async () => {
-          try {
-            // Trigger AI guess
-            const aiResponse = await fetch(`/api/ai-guess/${gameId}`, { method: 'POST' });
-            const aiData: SubmitGuessResponse = await aiResponse.json();
+      const delay = timingData.success && timingData.data ? timingData.data.timing : 2000;
+      
+      // Wait for realistic AI "thinking" time
+      setTimeout(async () => {
+        try {
+          // Trigger AI guess
+          const aiResponse = await fetch(`/api/ai-guess/${gameId}`, { method: 'POST' });
+          const aiData: SubmitGuessResponse = await aiResponse.json();
+          
+          if (aiData.success && aiData.data) {
+            setGameState(aiData.data.gameState);
+            setIsWaitingForOpponent(false);
             
-            if (aiData.success && aiData.data) {
-              setGameState(aiData.data.gameState);
-              
-              if (aiData.data.gameEnded) {
-                updateGameStatus(aiData.data.gameState);
-              } else {
-                // Schedule next AI guess
-                scheduleAIGuess();
-              }
-            } else {
-              console.error('AI guess failed:', aiData.error);
-              // Continue scheduling even if one guess fails
-              if (gameStatus === 'playing') {
-                scheduleAIGuess();
-              }
+            if (aiData.data.gameEnded) {
+              updateGameStatus(aiData.data.gameState);
             }
-          } catch (error) {
-            console.error('Error in AI guess:', error);
-            // Continue scheduling even if there's an error
-            if (gameStatus === 'playing') {
-              scheduleAIGuess();
-            }
+          } else {
+            console.error('AI guess failed:', aiData.error);
+            setIsWaitingForOpponent(false);
           }
-        }, timingData.data.timing);
-      }
+        } catch (error) {
+          console.error('Error in AI guess:', error);
+          setIsWaitingForOpponent(false);
+        }
+      }, delay);
     } catch (error) {
-      console.error('Error scheduling AI guess:', error);
+      console.error('Error triggering AI guess:', error);
+      setIsWaitingForOpponent(false);
     }
   };
 
   const handleKeyPress = (key: string) => {
-    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess) return;
+    // TURN-BASED: Don't allow input if it's not player's turn
+    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess || showInvalidWord) return;
+    if (gameState.currentPlayer !== currentPlayer.id) return;
     if (currentGuess.length < wordLength) {
       setCurrentGuess(currentGuess + key);
     }
   };
 
   const handleDelete = () => {
-    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess) return;
+    // TURN-BASED: Don't allow input if it's not player's turn
+    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess || showInvalidWord) return;
+    if (gameState.currentPlayer !== currentPlayer.id) return;
     setCurrentGuess(currentGuess.slice(0, -1));
   };
 
   const handleEnter = async () => {
-    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess) return;
+    if (gameStatus !== 'playing' || isPaused || isSubmittingGuess || showInvalidWord) return;
     if (currentGuess.length !== wordLength) return;
+    
+    // TURN-BASED: Check if it's the player's turn
+    if (gameState.currentPlayer !== currentPlayer.id) {
+      console.log('Not your turn!');
+      return;
+    }
+
+    // Check if player has reached their guess limit
+    const getHumanGuessLimit = () => {
+      if (!difficulty) return Infinity; // Unlimited for multiplayer
+      switch (difficulty) {
+        case 'easy': return Infinity; // Unlimited
+        case 'medium': return 15;
+        case 'difficult': return 10;
+        default: return Infinity;
+      }
+    };
+    
+    const humanGuessLimit = getHumanGuessLimit();
+    if (guesses.length >= humanGuessLimit) {
+      console.log('Player has reached guess limit:', humanGuessLimit);
+      return; // Don't allow more guesses
+    }
 
     const success = await submitGuess(currentGuess);
+    
     if (success) {
+      // Clear the current guess
       setCurrentGuess('');
+      // Note: gameState will be updated with new currentPlayer from server
+      // The polling will detect it's now AI's turn and trigger AI guess
+    } else {
+      // Show invalid word in red briefly
+      setInvalidWord(currentGuess);
+      setShowInvalidWord(true);
       
-      // Schedule AI guess if in single player mode
-      if (!isMultiplayer && gameStatus === 'playing') {
-        scheduleAIGuess();
-      }
+      // Clear after 1 second
+      setTimeout(() => {
+        setShowInvalidWord(false);
+        setInvalidWord('');
+        setCurrentGuess('');
+      }, 1000);
     }
   };
 
-  // Initialize game state and start AI/polling
+  // Initialize game state and start polling
   useEffect(() => {
     // Update initial game status
     updateGameStatus(gameState);
@@ -264,18 +320,19 @@ export function Game({
       });
     }
 
-    // Start AI guessing if single player
+    // TURN-BASED: Check if it's AI's turn at game start
     if (!isMultiplayer && gameState.status === 'active') {
-      scheduleAIGuess();
+      const aiPlayer = gameState.player1.isAI ? gameState.player1 : gameState.player2;
+      if (gameState.currentPlayer === aiPlayer.id) {
+        setIsWaitingForOpponent(true);
+        triggerAIGuess();
+      }
     }
 
-    // Start polling for game state updates
-    gameStatePollingRef.current = setInterval(pollGameState, 2000);
+    // Start polling for game state updates (checks turns and triggers AI)
+    gameStatePollingRef.current = setInterval(pollGameState, 1500);
 
     return () => {
-      if (aiTimerRef.current) {
-        clearTimeout(aiTimerRef.current);
-      }
       if (gameStatePollingRef.current) {
         clearInterval(gameStatePollingRef.current);
       }
@@ -291,6 +348,9 @@ export function Game({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameStatus !== 'playing' || isPaused || isSubmittingGuess) return;
+      
+      // TURN-BASED: Check if it's player's turn before allowing keyboard input
+      if (gameState.currentPlayer !== currentPlayer.id) return;
 
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -309,7 +369,7 @@ export function Game({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameStatus, isPaused, isSubmittingGuess]);
+  }, [currentGuess, gameStatus, isPaused, isSubmittingGuess, gameState.currentPlayer, currentPlayer.id, showInvalidWord]);
 
 
 
@@ -382,9 +442,11 @@ export function Game({
         <div className="bg-gradient-to-br from-white/90 to-white/70 rounded-lg shadow-xl p-1.5 border-2 border-[#4a9b3c]/40 w-fit mx-auto">
           <Board
             guesses={guesses}
-            currentGuess={currentGuess}
+            currentGuess={showInvalidWord ? invalidWord : currentGuess}
             wordLength={wordLength}
             maxGuesses={6}
+            showInvalidWord={showInvalidWord}
+            {...(difficulty && { difficulty })}
           />
         </div>
       </div>
@@ -418,11 +480,18 @@ export function Game({
           </div>
         )}
 
+        {/* Waiting for opponent modal - show when it's opponent's turn */}
+        <WaitingModal 
+          isVisible={gameStatus === 'playing' && gameState.currentPlayer !== currentPlayer.id}
+          opponentName={opponentName}
+        />
+
         {/* End game modal */}
         {gameStatus !== 'playing' && (
           <EndGameModal
             result={gameStatus === 'win' ? 'win' : gameStatus === 'lose' ? 'lose' : 'draw'}
             opponentWord={opponentWord}
+            opponentWordDefinition={opponentWordDefinition}
             pointsEarned={gameStatus === 'win' ? 100 : 0}
             coinsEarned={gameStatus === 'win' ? 50 : 0}
             onReturnToDashboard={onExit}

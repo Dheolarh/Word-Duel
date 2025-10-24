@@ -1,49 +1,28 @@
-import { Modal } from './Modal';
 import { SoundButton } from './SoundButton';
 import { useEffect } from 'react';
 import { playWinSound, playLoseSound, playTieSound } from '../utils/sound';
 import youWinImage from '../assets/themes/Default/Win.webp';
-import youWinImageHalloween from '../assets/themes/Halloween/Win.webp';
 import youLoseImage from '../assets/themes/Default/Lose.webp';
-import youLoseImageHalloween from '../assets/themes/Halloween/Lose.webp';
 import aTieImage from '../assets/themes/Default/Tie.webp';
-import aTieImageHalloween from '../assets/themes/Halloween/Tie.webp';
 import quitBtn from '../assets/themes/Default/Quit.webp';
-import quitBtnHalloween from '../assets/themes/Halloween/Quit.webp';
 
 interface EndGameModalProps {
   result: 'win' | 'lose' | 'draw';
   opponentWord: string;
+  opponentWordDefinition?: string;
   pointsEarned?: number;
   coinsEarned?: number;
   onReturnToDashboard: () => void;
 }
 
-// Mock word meanings
-const wordMeanings: Record<string, string> = {
-  WORDS: 'units of language that carry meaning',
-  GAMES: 'activities engaged in for enjoyment',
-  PLAYS: 'engages in activity for enjoyment',
-  DUELS: 'contests between two parties',
-  LIONS: 'large tawny-colored cats',
-  BRAIN: 'organ of soft nervous tissue',
-  CLASH: 'violent conflict or disagreement',
-  FIGHT: 'take part in a violent struggle',
-  WORD: 'single unit of language',
-  GAME: 'form of competitive activity',
-  PLAY: 'engage in activity for enjoyment',
-  DUAL: 'consisting of two parts',
-  DUEL: 'contest between two people',
-  WINS: 'successful results in a contest',
-};
-
 export function EndGameModal({
   result,
   opponentWord,
+  opponentWordDefinition,
   pointsEarned,
   onReturnToDashboard,
 }: EndGameModalProps) {
-  const wordMeaning = wordMeanings[opponentWord] || 'a common word';
+  const wordMeaning = opponentWordDefinition || 'a word';
 
   useEffect(() => {
     if (result === 'win') {
@@ -56,12 +35,12 @@ export function EndGameModal({
   }, [result]);
 
   return (
-    <Modal title="" onClose={onReturnToDashboard}>
-      <div className="flex flex-col items-center space-y-2 pb-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-auto">
+      <div className="flex flex-col items-center space-y-2 pb-2 w-full max-w-sm px-4">
         {/* Match Points */}
         {result === 'win' && pointsEarned && (
           <div className="text-center">
-            <p className="text-base text-[#c8e6a0]" style={{ textShadow: '2px 2px 0 #2d5016' }}>
+            <p className="text-base text-black font-semibold" style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}>
               Match Points: +{pointsEarned}
             </p>
           </div>
@@ -88,7 +67,7 @@ export function EndGameModal({
 
         {/* Opponent's Word and Meaning */}
         <div className="text-center space-y-1 mt-1 px-2">
-          <p className="text-xs text-[#2d5016]">
+          <p className="text-xs text-black font-medium" style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}>
             <span className="uppercase tracking-wider text-sm">{opponentWord}</span>
             {' - '}
             <span className="italic">{wordMeaning}</span>
@@ -102,6 +81,6 @@ export function EndGameModal({
           </SoundButton>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }

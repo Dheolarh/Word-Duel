@@ -23,7 +23,7 @@ export function Modal({ title, headerImage, children, onClose }: ModalProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="relative w-full max-w-sm bg-white rounded-xl shadow-xl max-h-[85vh] overflow-y-auto"
+        className="relative w-full max-w-sm bg-white rounded-xl shadow-xl max-h-[85vh] overflow-hidden flex flex-col"
       >
         {headerImage ? (
           <div className="relative flex items-center justify-center pt-3 pb-2">
@@ -46,7 +46,7 @@ export function Modal({ title, headerImage, children, onClose }: ModalProps) {
             </SoundButton>
           </div>
         )}
-        <div className="p-3">{children}</div>
+        <div className="p-3 overflow-y-auto flex-1">{children}</div>
       </motion.div>
     </motion.div>
   );
