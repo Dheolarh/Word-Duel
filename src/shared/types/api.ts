@@ -1,4 +1,4 @@
-import { GameState, LeaderboardEntry } from './game';
+import { GameState, LeaderboardEntry, ScoreBreakdown } from './game';
 
 // Legacy API responses (keeping for compatibility)
 export type InitResponse = {
@@ -61,6 +61,7 @@ export interface SubmitGuessResponse {
       timestamp: number;
     };
     gameEnded: boolean;
+    scoreBreakdown?: ScoreBreakdown;
   };
   error?: string;
   code?: 'VALIDATION_ERROR' | 'NETWORK_ERROR' | 'GAME_ERROR' | 'SERVER_ERROR';
@@ -71,6 +72,7 @@ export interface GetGameStateResponse {
   success: boolean;
   data?: {
     gameState: GameState;
+    scoreBreakdown?: ScoreBreakdown;
   };
   error?: string;
   code?: 'VALIDATION_ERROR' | 'NETWORK_ERROR' | 'GAME_ERROR' | 'SERVER_ERROR';
@@ -87,5 +89,21 @@ export interface CreateGameRequest {
 export interface GetLeaderboardResponse {
   success: boolean;
   leaderboard?: LeaderboardEntry[];
+  currentPlayerData?: LeaderboardEntry;
   error?: string;
+}
+
+export interface UserProfileResponse {
+  success: boolean;
+  data?: {
+    profile: {
+      userId: string;
+      username: string;
+      profilePicture: string;
+      isRedditProfile: boolean;
+    };
+  };
+  error?: string;
+  code?: 'VALIDATION_ERROR' | 'NETWORK_ERROR' | 'GAME_ERROR' | 'SERVER_ERROR';
+  retryable?: boolean;
 }

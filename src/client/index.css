@@ -1792,3 +1792,22 @@ html {
 .animate-fade-in {
   animation: fade-in 0.5s ease-out;
 }
+
+/* Custom scrollbar styles for leaderboard */
+.leaderboard-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: #4a9b3c;
+  border-radius: 3px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: #3d8432;
+}

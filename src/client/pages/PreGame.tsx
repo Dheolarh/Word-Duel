@@ -121,6 +121,7 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
       }
     } catch (error) {
       console.error('Word validation error:', error);
+      // Always show inline error, never modal in PreGame
       setValidationState({
         isValidating: false,
         validatedWord: null,
@@ -357,6 +358,7 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
           </div>
         </div>
       </div>
+
     </div>
   );
 }

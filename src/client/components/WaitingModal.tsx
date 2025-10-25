@@ -1,10 +1,15 @@
 interface WaitingModalProps {
   isVisible: boolean;
   opponentName: string;
+  isMultiplayer?: boolean;
 }
 
-export function WaitingModal({ isVisible, opponentName }: WaitingModalProps) {
+export function WaitingModal({ isVisible, opponentName, isMultiplayer = false }: WaitingModalProps) {
   if (!isVisible) return null;
+
+  const waitingMessage = isMultiplayer 
+    ? "Your opponent is making their move..."
+    : "AI is thinking...";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
@@ -22,7 +27,7 @@ export function WaitingModal({ isVisible, opponentName }: WaitingModalProps) {
           className="text-sm text-black"
           style={{ textShadow: '1px 1px 3px rgba(255,255,255,0.8)' }}
         >
-          Your opponent is making their move...
+          {waitingMessage}
         </p>
       </div>
     </div>

@@ -6,6 +6,8 @@ import { ImageWithFallback } from '../components/fallback/ImageWithFallback';
 import { Toggle } from '../components/Toggle';
 import { useAudio } from '../contexts/AudioContext';
 import { playBackgroundMusic } from '../utils/sound';
+import { LeaderboardEntry } from '../../shared/types/game';
+import { getCurrentUserProfile } from '../utils/userProfile';
 import logo from '../assets/themes/Default/Logo.webp';
 import leaderboardIcon from '../assets/themes/Default/LeaderboardButton.webp';
 import settingsIcon from '../assets/themes/Default/Settings.webp';
@@ -26,6 +28,11 @@ export function Dashboard({ onPlay }: DashboardProps) {
   const [showTutorial, setShowTutorial] = useState(false);
   const [settingsMode, setSettingsMode] = useState<'themes' | 'music'>('themes');
   const [selectedTheme, setSelectedTheme] = useState<'green' | 'halloween'>('green');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [currentPlayerData, setCurrentPlayerData] = useState<LeaderboardEntry | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { settings, toggleBackgroundMusic, toggleSoundEffects } = useAudio();
 
   // Auto-trigger background music immediately when dashboard loads
@@ -115,13 +122,62 @@ export function Dashboard({ onPlay }: DashboardProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const mockLeaderboard = [
-    { rank: 1, name: 'WordMaster', points: 1250 },
-    { rank: 2, name: 'LetterLord', points: 1100 },
-    { rank: 3, name: 'GuessGuru', points: 980 },
-    { rank: 4, name: 'VocabViking', points: 850 },
-    { rank: 5, name: 'SpellSlayer', points: 720 },
-  ];
+  // Fetch leaderboard data when component mounts or when leaderboard modal is opened
+  const fetchLeaderboard = async () => {
+    if (leaderboardLoading) return; // Prevent multiple simultaneous requests
+    
+    setLeaderboardLoading(true);
+    setLeaderboardError(null);
+    
+    try {
+      // Get current user profile for highlighting
+      let userId = currentUserId;
+      if (!userId) {
+        try {
+          const profile = await getCurrentUserProfile();
+          userId = profile.userId;
+          setCurrentUserId(userId);
+        } catch (error) {
+          console.log('Could not get current user profile:', error);
+        }
+      }
+      
+      // Fetch leaderboard with current user context
+      const url = userId ? `/api/get-leaderboard?limit=100&currentUserId=${encodeURIComponent(userId)}` : '/api/get-leaderboard?limit=100';
+      const response = await fetch(url);
+      const result = await response.json();
+      
+      if (result.success && result.data?.leaderboard) {
+        setLeaderboard(result.data.leaderboard);
+        setCurrentPlayerData(result.data.currentPlayerData || null);
+        setLeaderboardError(null);
+      } else {
+        setLeaderboardError(result.error || 'Failed to load leaderboard');
+        // Fallback to empty array if no data
+        setLeaderboard([]);
+        setCurrentPlayerData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      setLeaderboardError('Network error loading leaderboard');
+      setLeaderboard([]);
+      setCurrentPlayerData(null);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
+
+  // Fetch leaderboard when component mounts
+  useEffect(() => {
+    fetchLeaderboard();
+  }, []);
+
+  // Handle leaderboard modal opening
+  const handleShowLeaderboard = () => {
+    setShowLeaderboard(true);
+    // Refresh leaderboard data when modal opens
+    fetchLeaderboard();
+  };
 
   return (
     <div className="w-full h-screen flex flex-col p-2 overflow-hidden">
@@ -151,7 +207,7 @@ export function Dashboard({ onPlay }: DashboardProps) {
 
         <div className="flex flex-col gap-2">
           <SoundButton
-            onClick={() => setShowLeaderboard(true)}
+            onClick={handleShowLeaderboard}
             className="w-10 h-10 hover:scale-105 transition-transform"
           >
             <img src={leaderboardIcon} alt="Leaderboard" className="w-full h-full" />
@@ -184,13 +240,91 @@ export function Dashboard({ onPlay }: DashboardProps) {
       <AnimatePresence>
         {showLeaderboard && (
           <Modal headerImage={leaderboardHeader} onClose={() => setShowLeaderboard(false)}>
-            <div className="space-y-1">
-              {mockLeaderboard.map((entry) => (
-                <div key={entry.rank} className="flex items-center justify-between py-1">
-                  <span className="text-sm text-[#2d5016]">{entry.name}</span>
-                  <span className="text-sm text-[#2d5016]">{entry.points}</span>
+            <div className="flex flex-col max-h-[85vh]">
+              {leaderboardLoading ? (
+                <div className="text-center py-4">
+                  <span className="text-sm text-[#2d5016]">Loading leaderboard...</span>
                 </div>
-              ))}
+              ) : leaderboardError ? (
+                <div className="text-center py-4">
+                  <span className="text-sm text-red-600">{leaderboardError}</span>
+                  <button 
+                    onClick={fetchLeaderboard}
+                    className="block mx-auto mt-2 px-3 py-1 text-xs bg-[#2d5016] text-white rounded hover:bg-[#1a2f0a] transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : leaderboard.length === 0 && !currentPlayerData ? (
+                <div className="text-center py-4">
+                  <span className="text-sm text-[#2d5016]">No players on leaderboard yet.</span>
+                  <p className="text-xs text-[#2d5016] mt-1">Play some games to see rankings!</p>
+                </div>
+              ) : (
+                <>
+                  {/* Current Player Highlight (if not in top 100) */}
+                  {currentPlayerData && !leaderboard.find(entry => entry.userId === currentPlayerData.userId) && (
+                    <div className="mb-3 pb-2 border-b border-[#4a9b3c]/30">
+                      <div className="text-xs text-[#2d5016] mb-1 text-center font-semibold">Your Position</div>
+                      <div className="flex items-center justify-between py-2 px-2 bg-gradient-to-r from-[#e8f5e3] to-[#d4ead0] rounded-md border-2 border-[#4a9b3c]">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-[#2d5016] font-bold w-6">#{currentPlayerData.rank}</span>
+                          <span className="text-sm text-[#2d5016] font-semibold">{currentPlayerData.username}</span>
+                        </div>
+                        <span className="text-sm text-[#2d5016] font-bold">{currentPlayerData.points}</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Top 100 Leaderboard */}
+                  {leaderboard.length > 0 && (
+                    <>
+                      <div className="text-xs text-[#2d5016] mb-2 text-center font-semibold">
+                        Top {leaderboard.length} Players
+                      </div>
+                      <div 
+                        className="overflow-y-auto max-h-[400px] space-y-1 pr-1 leaderboard-scroll" 
+                        style={{
+                          scrollbarWidth: 'thin',
+                          scrollbarColor: '#4a9b3c #e5e7eb'
+                        }}
+                      >
+                        {leaderboard.map((entry) => {
+                          const isCurrentPlayer = currentUserId && entry.userId === currentUserId;
+                          return (
+                            <div 
+                              key={`${entry.rank}-${entry.userId}`} 
+                              className={`flex items-center justify-between py-2 px-2 rounded-md transition-colors ${
+                                isCurrentPlayer 
+                                  ? 'bg-gradient-to-r from-[#e8f5e3] to-[#d4ead0] border-2 border-[#4a9b3c]' 
+                                  : 'hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`text-xs font-bold w-6 ${
+                                  isCurrentPlayer ? 'text-[#2d5016]' : 'text-[#2d5016]'
+                                }`}>
+                                  #{entry.rank}
+                                </span>
+                                <span className={`text-sm ${
+                                  isCurrentPlayer ? 'text-[#2d5016] font-semibold' : 'text-[#2d5016]'
+                                }`}>
+                                  {entry.username}
+                                </span>
+                              </div>
+                              <span className={`text-sm font-semibold ${
+                                isCurrentPlayer ? 'text-[#2d5016] font-bold' : 'text-[#2d5016]'
+                              }`}>
+                                {entry.points}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </Modal>
         )}
@@ -277,6 +411,7 @@ export function Dashboard({ onPlay }: DashboardProps) {
             )}
           </Modal>
         )}
+
       </AnimatePresence>
     </div>
   );

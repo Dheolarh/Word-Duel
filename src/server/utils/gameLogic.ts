@@ -86,30 +86,163 @@ export function getWinningGuess(guesses: GuessResult[]): GuessResult | null {
 }
 
 /**
- * Calculate points awarded for a game result
+ * Count unique correctly guessed letters (green and yellow feedback) across all guesses
+ * Only counts each letter once, even if it appears multiple times across different guesses
+ */
+export function countCorrectLetters(guesses: GuessResult[]): number {
+  const uniqueCorrectLetters = new Set<string>();
+  
+  guesses.forEach(guess => {
+    guess.guess.split('').forEach((letter, index) => {
+      const feedback = guess.feedback[index];
+      if (feedback === 'green' || feedback === 'yellow') {
+        uniqueCorrectLetters.add(letter.toUpperCase());
+      }
+    });
+  });
+  
+  return uniqueCorrectLetters.size;
+}
+
+/**
+ * Calculate points awarded for a game result with comprehensive scoring system
  */
 export function calculatePoints(
   won: boolean,
   guessCount: number,
   timeRemaining: number,
-  difficulty?: 'easy' | 'medium' | 'difficult'
+  difficulty?: 'easy' | 'medium' | 'difficult',
+  isMultiplayer: boolean = false,
+  guesses: GuessResult[] = []
 ): number {
-  if (!won) return 0;
+  // Base points for participation
+  const basePoints = 50;
   
-  let basePoints = 100;
-  
-  // Bonus for fewer guesses (max 6 guesses)
-  const guessBonus = Math.max(0, (6 - guessCount) * 10);
-  
-  // Bonus for time remaining (up to 50 points)
-  const timeBonus = Math.min(50, Math.floor(timeRemaining / 1000 / 6)); // 1 point per 6 seconds
+  // Loss points (different for single vs multiplayer)
+  if (!won) {
+    if (isMultiplayer) {
+      return 100; // Multiplayer loss points
+    } else {
+      // Single player loss points based on difficulty
+      switch (difficulty) {
+        case 'easy': return 20;
+        case 'medium': return 30;
+        case 'difficult': return 50;
+        default: return 20;
+      }
+    }
+  }
   
   // Difficulty multiplier
-  let difficultyMultiplier = 1;
-  if (difficulty === 'medium') difficultyMultiplier = 1.2;
-  if (difficulty === 'difficult') difficultyMultiplier = 1.5;
+  const difficultyMultipliers = {
+    easy: 1.0,
+    medium: 1.3,
+    difficult: 1.6
+  };
   
-  return Math.floor((basePoints + guessBonus + timeBonus) * difficultyMultiplier);
+  const difficultyMultiplier = difficulty ? difficultyMultipliers[difficulty] : 1.0;
+  
+  // Guess efficiency bonus (fewer guesses = higher bonus)
+  const maxGuesses = 6;
+  const guessBonus = Math.max(0, (maxGuesses - guessCount) * 15);
+  
+  // Speed bonus (time remaining bonus)
+  const speedBonus = Math.min(60, Math.floor(timeRemaining / 1000 / 5)); // 1 point per 5 seconds remaining
+  
+  // Letter accuracy bonus (5 points per correctly guessed letter)
+  const correctLettersCount = countCorrectLetters(guesses);
+  const letterBonus = correctLettersCount * 5;
+  
+  // Multiplayer multiplier (2.5x for multiplayer)
+  const multiplayerMultiplier = isMultiplayer ? 2.5 : 1.0;
+  
+  // Calculate final score
+  const totalScore = Math.floor(
+    (basePoints + guessBonus + speedBonus + letterBonus) * 
+    difficultyMultiplier * 
+    multiplayerMultiplier
+  );
+  
+  return totalScore;
+}
+
+/**
+ * Calculate detailed score breakdown for display
+ */
+export function calculateScoreBreakdown(
+  won: boolean,
+  guessCount: number,
+  timeRemaining: number,
+  difficulty?: 'easy' | 'medium' | 'difficult',
+  isMultiplayer: boolean = false,
+  guesses: GuessResult[] = []
+): {
+  basePoints: number;
+  guessBonus: number;
+  speedBonus: number;
+  letterBonus: number;
+  difficultyMultiplier: number;
+  multiplayerMultiplier: number;
+  totalScore: number;
+  correctLettersCount: number;
+} {
+  const basePoints = 50;
+  
+  if (!won) {
+    let lossPoints: number;
+    if (isMultiplayer) {
+      lossPoints = 100;
+    } else {
+      switch (difficulty) {
+        case 'easy': lossPoints = 20; break;
+        case 'medium': lossPoints = 30; break;
+        case 'difficult': lossPoints = 50; break;
+        default: lossPoints = 20;
+      }
+    }
+    
+    return {
+      basePoints: lossPoints,
+      guessBonus: 0,
+      speedBonus: 0,
+      letterBonus: 0,
+      difficultyMultiplier: 1.0,
+      multiplayerMultiplier: 1.0,
+      totalScore: lossPoints,
+      correctLettersCount: 0
+    };
+  }
+  
+  const difficultyMultipliers = {
+    easy: 1.0,
+    medium: 1.3,
+    difficult: 1.6
+  };
+  
+  const difficultyMultiplier = difficulty ? difficultyMultipliers[difficulty] : 1.0;
+  const maxGuesses = 6;
+  const guessBonus = Math.max(0, (maxGuesses - guessCount) * 15);
+  const speedBonus = Math.min(60, Math.floor(timeRemaining / 1000 / 5));
+  const correctLettersCount = countCorrectLetters(guesses);
+  const letterBonus = correctLettersCount * 5;
+  const multiplayerMultiplier = isMultiplayer ? 2.5 : 1.0;
+  
+  const totalScore = Math.floor(
+    (basePoints + guessBonus + speedBonus + letterBonus) * 
+    difficultyMultiplier * 
+    multiplayerMultiplier
+  );
+  
+  return {
+    basePoints,
+    guessBonus,
+    speedBonus,
+    letterBonus,
+    difficultyMultiplier,
+    multiplayerMultiplier,
+    totalScore,
+    correctLettersCount
+  };
 }
 
 /**

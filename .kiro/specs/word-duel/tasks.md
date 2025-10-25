@@ -50,7 +50,6 @@
 
 - [x] 7. Develop AI opponent system
 
-
   - Create AI word selection and strategy algorithms for all three difficulty levels
   - Implement Easy AI with random guessing and green-only feedback usage
   - Implement Medium AI with green/red feedback filtering
@@ -58,11 +57,6 @@
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
 - [x] 8. Create single player game flow
-
-
-
-
-
 
   - Implement POST /api/create-game endpoint for single player mode
   - Build game session creation with AI opponent assignment
@@ -72,32 +66,28 @@
 
 - [x] 9. Build game interface and interaction system
 
-
-
-
-
-
   - Implement custom keyboard component with mobile keyboard prevention
   - Add physical keyboard support for desktop users with event mapping
   - Create game board display with guess rows and color feedback
   - Implement timer component with countdown functionality
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.2, 6.4_
 
-- [ ] 10. Implement real-time game updates and AI behavior
+- [x] 10. Implement turn-based game updates and AI behavior
 
-  - Create polling mechanism for game state synchronization
+  - Create polling mechanism for game state synchronization with turn management
   - Implement AI guess timing with appropriate intervals per difficulty
   - Add opponent guess display without color feedback
   - Handle game end conditions and winner determination
-  - _Requirements: 5.3, 6.5, 7.1, 7.2, 7.3_
+  - Implement turn-based mechanics with waiting indicators
+  - _Requirements: 5.3, 6.5, 7.1, 7.2, 7.3, 12.1, 12.2, 12.4_
 
-- [ ] 11. Create end game system and user feedback
+- [x] 11. Create end game system and user feedback
 
   - Build end game modal with win/lose/draw status display
-  - Implement points and coins calculation system
-  - Add opponent secret word reveal functionality
-  - Create "Play Again" and "Return to Dashboard" navigation
-  - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - Add opponent secret word reveal functionality with definitions
+  - Create "Return to Dashboard" navigation
+  - Add placeholder for points display (hardcoded values)
+  - _Requirements: 8.1, 8.2, 8.4_
 
 - [ ] 11.1 Write unit tests for single player game logic
 
@@ -106,71 +96,98 @@
   - Validate game state management functions
   - _Requirements: 5.1, 7.4, 7.5_
 
-- [ ] 12. Implement basic leaderboard system
+- [x] 12. Implement comprehensive audio system
+
+  - Create audio context and sound management utilities
+  - Implement background music with auto-play functionality
+  - Add sound effects for button clicks and interactions
+  - Build audio settings with independent music and sound effect toggles
+  - Integrate audio preloading with splash screen asset loading
+  - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
+
+- [x] 13. Implement comprehensive scoring system
+
+  - Update scoring algorithm with 50 base points and 2.5x multiplayer multiplier
+  - Implement loss points system (for single player (20 for easy, 30 for medium, 50 for hard), 100 for multiplayer)
+  - Modify calculatePoints function to include letter accuracy bonus
+  - Replace hardcoded points in EndGameModal with server-calculated values
+  - Add score breakdown display showing how points were calculated
+  - _Requirements: 8.3, 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
+
+- [x] 14. Implement basic leaderboard system
 
   - Create user data storage and retrieval in Redis
   - Implement GET /api/get-leaderboard endpoint
-  - Build leaderboard display in Dashboard.tsx
+
+  - Build leaderboard display in Dashboard.tsx (replace mock data)
   - Add points tracking and ranking calculation
   - _Requirements: 8.5, 11.3_
 
-- [ ] 13. Add comprehensive error handling
+- [x] 15. Integrate Reddit profile system
+
+  - Implement Reddit user authentication and profile access via Devvit SDK
+  - Replace placeholder profile images with actual Reddit profile icons
+  - Add Reddit username integration for player identification
+  - Create fallback system for when profile information is unavailable
+  - Test profile integration with Reddit privacy settings
+  - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
+
+- [x] 16. Add comprehensive error handling
 
   - Implement error modals with end game modal styling
   - Add network error handling throughout the application
-  - Create graceful fallbacks for API failures
+  - Create graceful fallbacks for dictionary validation failures
   - Ensure proper error messaging with game fonts and colors
   - _Requirements: 2.7, 11.4_
 
-- [ ] 14. Test and refine single player mode
-
-  - Conduct end-to-end testing of complete single player flow
-  - Verify AI behavior across all difficulty levels
-  - Test error scenarios and edge cases
-  - Optimize performance and user experience
-  - _Requirements: All single player requirements_
-
-- [ ] 15. Implement multiplayer matchmaking system
+- [x] 17. Implement multiplayer matchmaking system
 
   - Create matchmaking queues for 4-letter and 5-letter word games
   - Implement word-length-based player matching algorithm
+
   - Build Searching.tsx screen with matchmaking status
   - Add queue management and timeout handling
   - _Requirements: 3.3, 3.5, 9.1, 9.2, 9.3_
 
-- [ ] 16. Build multiplayer game synchronization
+- [x] 18. Build multiplayer game synchronization
 
   - Extend game state management for two human players
-  - Implement real-time state synchronization between players
-  - Add concurrent guessing support without turn restrictions
+  - Implement turn-based state synchronization between players
+  - Adapt turn-based mechanics for multiplayer games with 2.5x scoring multiplier
   - Handle player disconnection scenarios gracefully
-  - _Requirements: 9.4, 9.5, 9.6, 9.7_
+  - _Requirements: 9.4, 9.5, 9.6, 9.7, 12.1, 12.2, 14.2_
 
-- [ ] 17. Integrate multiplayer with existing game interface
-
-  - Adapt Game.tsx to handle multiplayer game states
-  - Ensure opponent guess display works for human players
-  - Implement first-correct-guess winner determination
-  - Test multiplayer game flow end-to-end
-  - _Requirements: 9.4, 9.6_
-
-- [ ] 17.1 Write integration tests for multiplayer functionality
+- [x] 18.1 Write integration tests for multiplayer functionality
 
   - Test matchmaking algorithm with different scenarios
-  - Validate real-time synchronization between players
+  - Validate turn-based synchronization between players
   - Test disconnection and reconnection handling
-  - _Requirements: 9.1, 9.4, 9.7_
+  - Validate multiplayer scoring calculations
+  - _Requirements: 9.1, 9.4, 9.7, 14.2_
 
-- [ ] 18. Final testing and optimization
+- [x] 19. Integrate multiplayer with existing game interface
+
+  - Adapt Game.tsx to handle multiplayer game states with turn-based mechanics
+  - Ensure opponent guess display works for human players with Reddit profiles
+  - Implement turn-based winner determination for multiplayer
+  - Test multiplayer game flow end-to-end with scoring system
+  - _Requirements: 9.4, 9.6, 12.1, 12.2, 14.2, 15.1_
+
+- [-] 20. Final testing and optimization
+
+
 
   - Conduct comprehensive testing of both single and multiplayer modes
   - Optimize asset loading and game performance
   - Verify all UI transitions and animations work correctly
-  - Test on both mobile and desktop environments
+  - Test turn-based mechanics and scoring system on both mobile and desktop
+  - Validate Reddit profile integration across different user scenarios
   - _Requirements: All requirements_
 
-- [ ] 18.1 Performance testing and optimization
+- [-] 20.1 Performance testing and optimization
+
   - Test concurrent user handling and server performance
   - Optimize Redis operations and API response times
-  - Validate asset preloading efficiency
+  - Validate asset preloading efficiency and audio system performance
+  - Test scoring calculations performance under load
   - _Requirements: Performance and scalability_

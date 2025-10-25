@@ -11,6 +11,7 @@ export interface GameState {
   currentPlayer: string;
   player1: PlayerState;
   player2: PlayerState;
+  statisticsUpdated?: boolean; // Flag to prevent double statistics updates
 }
 
 export interface PlayerState {
@@ -31,15 +32,29 @@ export interface GuessResult {
 
 export interface UserData {
   username: string;
+  profilePicture: string;
   points: number;
   coins: number;
   gamesPlayed: number;
   gamesWon: number;
-  averageGuesses: number;
+  isRedditProfile?: boolean; // Flag to indicate if profile picture is from Reddit
 }
 
 export interface LeaderboardEntry {
   username: string;
+  profilePicture: string;
   points: number;
   rank: number;
+  userId: string;
+}
+
+export interface ScoreBreakdown {
+  basePoints: number;
+  guessBonus: number;
+  speedBonus: number;
+  letterBonus: number;
+  difficultyMultiplier: number;
+  multiplayerMultiplier: number;
+  totalScore: number;
+  correctLettersCount: number;
 }

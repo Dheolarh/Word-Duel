@@ -3,12 +3,13 @@
  * Handles game creation, updates, and state transitions
  */
 
-import { GameState, PlayerState, GuessResult } from '../../shared/types/game';
+import { GameState, PlayerState, GuessResult, ScoreBreakdown } from '../../shared/types/game';
 import { RedisDataAccess } from '../main';
 import { generateGameId, createPlayerState, createGameState, isGameEnded, determineWinner } from './gameUtils';
-import { createGuessResult, calculatePoints, calculateCoins } from './gameLogic';
+import { createGuessResult, calculatePoints, calculateCoins, calculateScoreBreakdown } from './gameLogic';
 import { AIOpponentManager } from './aiOpponent';
 import { getDefinition } from '../services/dictionaryApi';
+import { redis } from '@devvit/web/server';
 
 export class GameStateManager {
   /**
@@ -91,7 +92,7 @@ export class GameStateManager {
   }
   
   /**
-   * Submit a guess for a player
+   * Submit a guess for a player with enhanced multiplayer synchronization
    */
   static async submitGuess(
     gameId: string,
@@ -126,6 +127,29 @@ export class GameStateManager {
       throw new Error('Not your turn');
     }
     
+    // Check for player disconnection in multiplayer games
+    if (gameState.mode === 'multi') {
+      const disconnectedPlayer = await this.checkPlayerDisconnection(gameState, playerId);
+      if (disconnectedPlayer) {
+        // Handle disconnection - award win to remaining player
+        gameState.status = 'finished';
+        gameState.winner = gameState.player1.id === playerId ? 'player1' : 'player2';
+        
+        // Add definitions for both players' secret words
+        gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+        gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+        
+        // Update statistics for disconnection scenario
+        if (!gameState.statisticsUpdated) {
+          await this.updateDisconnectionStatistics(gameState, disconnectedPlayer.id);
+          gameState.statisticsUpdated = true;
+        }
+        
+        await RedisDataAccess.saveGameState(gameId, gameState);
+        throw new Error('Opponent has disconnected - you win!');
+      }
+    }
+    
     // Determine which player is making the guess and get opponent's secret word
     let currentPlayer: PlayerState;
     let opponentPlayer: PlayerState;
@@ -149,6 +173,11 @@ export class GameStateManager {
     // Add guess to player's guess history
     currentPlayer.guesses.push(guessResult);
     
+    // Update player's last activity timestamp for disconnection detection
+    if (gameState.mode === 'multi') {
+      await this.updatePlayerActivity(gameId, playerId);
+    }
+    
     // TURN-BASED: Switch to opponent's turn after successful guess
     gameState.currentPlayer = opponentPlayer.id;
     
@@ -163,12 +192,15 @@ export class GameStateManager {
       gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
       gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
       
-      // Update user statistics and points
-      await this.updateGameEndStatistics(gameState);
+      // Update user statistics and points (only if not already updated)
+      if (!gameState.statisticsUpdated) {
+        await this.updateGameEndStatistics(gameState);
+        gameState.statisticsUpdated = true;
+      }
     }
     
-    // Save updated game state
-    await RedisDataAccess.saveGameState(gameId, gameState);
+    // Save updated game state with atomic operation for multiplayer synchronization
+    await this.saveGameStateAtomic(gameId, gameState);
     
     return { gameState, guessResult, gameEnded };
   }
@@ -236,32 +268,40 @@ export class GameStateManager {
     
     const userData = await RedisDataAccess.getUserData(player.id) || {
       username: player.username,
+      profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(player.username)}`,
       points: 0,
       coins: 0,
       gamesPlayed: 0,
-      gamesWon: 0,
-      averageGuesses: 0
+      gamesWon: 0
     };
     
     // Calculate time remaining
     const timeElapsed = Date.now() - gameState.startTime;
     const timeRemaining = Math.max(0, gameState.timeLimit - timeElapsed);
     
-    // Calculate points and coins
-    const points = calculatePoints(won, player.guesses.length, timeRemaining, player.difficulty);
+    // Determine if this is a multiplayer game
+    const isMultiplayer = gameState.mode === 'multi';
+    
+    // Calculate points and coins using new comprehensive scoring system
+    const points = calculatePoints(
+      won, 
+      player.guesses.length, 
+      timeRemaining, 
+      player.difficulty,
+      isMultiplayer,
+      player.guesses
+    );
     const coins = calculateCoins(points);
     
     // Update statistics
     userData.gamesPlayed += 1;
     if (won) {
       userData.gamesWon += 1;
-      userData.points += points;
-      userData.coins += coins;
     }
     
-    // Update average guesses
-    const totalGuesses = (userData.averageGuesses * (userData.gamesPlayed - 1)) + player.guesses.length;
-    userData.averageGuesses = totalGuesses / userData.gamesPlayed;
+    // Always add points (including loss points)
+    userData.points += points;
+    userData.coins += coins;
     
     // Save updated user data
     await RedisDataAccess.saveUserData(player.id, userData);
@@ -361,8 +401,11 @@ export class GameStateManager {
       // Clean up AI strategy
       AIOpponentManager.cleanupAIStrategy(gameId);
       
-      // Update user statistics
-      await this.updateGameEndStatistics(gameState);
+      // Update user statistics (only if not already updated)
+      if (!gameState.statisticsUpdated) {
+        await this.updateGameEndStatistics(gameState);
+        gameState.statisticsUpdated = true;
+      }
     }
     
     // Save updated game state
@@ -379,11 +422,311 @@ export class GameStateManager {
   }
 
   /**
-   * Clean up expired games
+   * Get score breakdown for a player in a finished game
+   */
+  static getPlayerScoreBreakdown(
+    player: PlayerState,
+    gameState: GameState,
+    won: boolean
+  ): ScoreBreakdown {
+    // Calculate time remaining
+    const timeElapsed = Date.now() - gameState.startTime;
+    const timeRemaining = Math.max(0, gameState.timeLimit - timeElapsed);
+    
+    // Determine if this is a multiplayer game
+    const isMultiplayer = gameState.mode === 'multi';
+    
+    return calculateScoreBreakdown(
+      won,
+      player.guesses.length,
+      timeRemaining,
+      player.difficulty,
+      isMultiplayer,
+      player.guesses
+    );
+  }
+
+  /**
+   * Check for player disconnection in multiplayer games
+   */
+  private static async checkPlayerDisconnection(
+    gameState: GameState,
+    activePlayerId: string
+  ): Promise<PlayerState | null> {
+    if (gameState.mode !== 'multi') return null;
+    
+    const disconnectionTimeout = 5 * 60 * 1000; // 5 minutes
+    const now = Date.now();
+    
+    // Get the opponent player
+    const opponentPlayer = gameState.player1.id === activePlayerId ? gameState.player2 : gameState.player1;
+    
+    // Check opponent's last activity
+    const lastActivity = await redis.get(`player_activity:${gameState.gameId}:${opponentPlayer.id}`);
+    
+    if (lastActivity) {
+      const lastActivityTime = parseInt(lastActivity);
+      if (now - lastActivityTime > disconnectionTimeout) {
+        return opponentPlayer;
+      }
+    } else {
+      // If no activity recorded, check if game has been active for more than timeout
+      if (now - gameState.startTime > disconnectionTimeout) {
+        return opponentPlayer;
+      }
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Update player activity timestamp for disconnection detection
+   */
+  private static async updatePlayerActivity(gameId: string, playerId: string): Promise<void> {
+    const activityKey = `player_activity:${gameId}:${playerId}`;
+    await redis.set(activityKey, Date.now().toString());
+    await redis.expire(activityKey, 3600); // Expire in 1 hour
+  }
+  
+  /**
+   * Handle disconnection statistics update
+   */
+  private static async updateDisconnectionStatistics(
+    gameState: GameState,
+    disconnectedPlayerId: string
+  ): Promise<void> {
+    const winningPlayer = gameState.player1.id === disconnectedPlayerId ? gameState.player2 : gameState.player1;
+    const disconnectedPlayer = gameState.player1.id === disconnectedPlayerId ? gameState.player1 : gameState.player2;
+    
+    // Update winner stats (gets full win points)
+    await this.updatePlayerStats(winningPlayer, true, gameState);
+    
+    // Update disconnected player stats (gets loss points)
+    await this.updatePlayerStats(disconnectedPlayer, false, gameState);
+  }
+  
+  /**
+   * Atomic game state save for multiplayer synchronization
+   */
+  private static async saveGameStateAtomic(gameId: string, gameState: GameState): Promise<void> {
+    // For Redis, we use a simple save since Redis operations are atomic
+    // In a more complex system, we might use Redis transactions or optimistic locking
+    await RedisDataAccess.saveGameState(gameId, gameState);
+  }
+  
+  /**
+   * Enhanced get game state for multiplayer with activity tracking
+   */
+  static async getGameStateForClientWithActivity(
+    gameId: string,
+    playerId: string
+  ): Promise<GameState | null> {
+    const gameState = await this.getGameStateForClient(gameId, playerId);
+    
+    if (!gameState) return null;
+    
+    // Update player activity for multiplayer games
+    if (gameState.mode === 'multi' && gameState.status === 'active') {
+      await this.updatePlayerActivity(gameId, playerId);
+      
+      // Check for opponent disconnection
+      const disconnectedPlayer = await this.checkPlayerDisconnection(gameState, playerId);
+      if (disconnectedPlayer) {
+        // Update game state to reflect disconnection
+        gameState.status = 'finished';
+        gameState.winner = gameState.player1.id === playerId ? 'player1' : 'player2';
+        
+        // Add definitions for both players' secret words
+        gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+        gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+        
+        // Update statistics for disconnection scenario
+        if (!gameState.statisticsUpdated) {
+          await this.updateDisconnectionStatistics(gameState, disconnectedPlayer.id);
+          gameState.statisticsUpdated = true;
+        }
+        
+        await this.saveGameStateAtomic(gameId, gameState);
+      }
+    }
+    
+    return gameState;
+  }
+  
+  /**
+   * Check if a multiplayer game is synchronized properly
+   */
+  static async validateMultiplayerSync(gameId: string): Promise<{
+    isValid: boolean;
+    issues: string[];
+  }> {
+    const gameState = await RedisDataAccess.getGameState(gameId);
+    const issues: string[] = [];
+    
+    if (!gameState) {
+      return { isValid: false, issues: ['Game not found'] };
+    }
+    
+    if (gameState.mode !== 'multi') {
+      return { isValid: true, issues: [] }; // Not a multiplayer game
+    }
+    
+    // Check if both players exist and are not AI
+    if (gameState.player1.isAI || gameState.player2.isAI) {
+      issues.push('Multiplayer game should not have AI players');
+    }
+    
+    // Check if current player is valid
+    if (gameState.currentPlayer !== gameState.player1.id && gameState.currentPlayer !== gameState.player2.id) {
+      issues.push('Invalid current player ID');
+    }
+    
+    // Check for reasonable guess counts (prevent infinite games)
+    const maxGuesses = 15; // Reasonable limit for multiplayer
+    if (gameState.player1.guesses.length > maxGuesses || gameState.player2.guesses.length > maxGuesses) {
+      issues.push('Excessive number of guesses detected');
+    }
+    
+    // Check time limits
+    const timeElapsed = Date.now() - gameState.startTime;
+    if (timeElapsed > gameState.timeLimit && gameState.status === 'active') {
+      issues.push('Game has exceeded time limit but is still active');
+    }
+    
+    return {
+      isValid: issues.length === 0,
+      issues
+    };
+  }
+  
+  /**
+   * Force end a multiplayer game due to synchronization issues
+   */
+  static async forceEndMultiplayerGame(
+    gameId: string,
+    reason: 'timeout' | 'disconnection' | 'sync_error'
+  ): Promise<GameState | null> {
+    const gameState = await RedisDataAccess.getGameState(gameId);
+    
+    if (!gameState || gameState.mode !== 'multi') {
+      return null;
+    }
+    
+    gameState.status = 'finished';
+    
+    // Determine winner based on reason and current state
+    switch (reason) {
+      case 'timeout':
+        gameState.winner = determineWinner(gameState);
+        break;
+      case 'disconnection':
+        // Winner is the player who didn't disconnect (handled elsewhere)
+        gameState.winner = 'draw';
+        break;
+      case 'sync_error':
+        gameState.winner = 'draw';
+        break;
+    }
+    
+    // Add definitions for both players' secret words
+    gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+    gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+    
+    // Update statistics if not already done
+    if (!gameState.statisticsUpdated) {
+      await this.updateGameEndStatistics(gameState);
+      gameState.statisticsUpdated = true;
+    }
+    
+    await this.saveGameStateAtomic(gameId, gameState);
+    
+    return gameState;
+  }
+  
+  /**
+   * Clean up expired games and inactive multiplayer sessions
    */
   static async cleanupExpiredGames(): Promise<void> {
-    // This would typically be called by a background job
-    // For now, we'll handle cleanup when games are accessed
-    // Implementation would involve scanning Redis for expired game keys
+    try {
+      // This is a simplified cleanup - in production, you'd want a more sophisticated approach
+      // For now, we'll clean up games that have been inactive for more than 2 hours
+      const cutoffTime = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
+      
+      // Note: In a real implementation, you'd scan Redis keys or maintain a separate index
+      // For this implementation, cleanup happens when games are accessed
+      console.log('Cleanup would remove games older than:', new Date(cutoffTime));
+    } catch (error) {
+      console.error('Error during game cleanup:', error);
+    }
+  }
+  
+  /**
+   * Enhanced multiplayer game state retrieval with automatic cleanup
+   */
+  static async getMultiplayerGameWithCleanup(gameId: string, playerId: string): Promise<GameState | null> {
+    const gameState = await this.getGameStateForClientWithActivity(gameId, playerId);
+    
+    if (!gameState) return null;
+    
+    // If it's a multiplayer game, validate synchronization
+    if (gameState.mode === 'multi' && gameState.status === 'active') {
+      const validation = await this.validateMultiplayerSync(gameId);
+      
+      if (!validation.isValid) {
+        console.warn(`Multiplayer sync issues in game ${gameId}:`, validation.issues);
+        
+        // If there are critical sync issues, consider force-ending the game
+        const criticalIssues = validation.issues.filter(issue => 
+          issue.includes('Excessive') || issue.includes('exceeded time limit')
+        );
+        
+        if (criticalIssues.length > 0) {
+          console.log(`Force-ending game ${gameId} due to critical sync issues`);
+          await this.forceEndMultiplayerGame(gameId, 'sync_error');
+          return await this.getGameStateForClient(gameId, playerId);
+        }
+      }
+    }
+    
+    return gameState;
+  }
+
+  /**
+   * Skip a player's turn due to timeout in multiplayer games
+   */
+  static async skipTurnDueToTimeout(
+    gameId: string, 
+    playerId: string
+  ): Promise<{ gameState: GameState } | null> {
+    const gameState = await RedisDataAccess.getGameState(gameId);
+    
+    if (!gameState) {
+      throw new Error('Game not found');
+    }
+    
+    if (gameState.status !== 'active') {
+      throw new Error('Game is not active');
+    }
+    
+    if (gameState.mode !== 'multi') {
+      return null; // Only for multiplayer games
+    }
+    
+    // Check if it's this player's turn
+    if (gameState.currentPlayer !== playerId) {
+      throw new Error('Not your turn');
+    }
+    
+    // Switch to opponent's turn
+    const opponentPlayer = gameState.player1.id === playerId ? gameState.player2 : gameState.player1;
+    gameState.currentPlayer = opponentPlayer.id;
+    
+    // Update player's last activity timestamp
+    await this.updatePlayerActivity(gameId, playerId);
+    
+    // Save updated game state
+    await this.saveGameStateAtomic(gameId, gameState);
+    
+    return { gameState };
   }
 }

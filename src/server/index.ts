@@ -1,5 +1,5 @@
 import express from 'express';
-import { InitResponse, IncrementResponse, DecrementResponse, ApiResponse } from '../shared/types/api';
+import { InitResponse, IncrementResponse, DecrementResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
 import { RedisDataAccess, formatResponse } from './main';
@@ -7,6 +7,11 @@ import { isValidWordFormat } from './utils/gameUtils';
 import { validateWordWithDictionary } from './services/dictionaryApi';
 import { GameStateManager } from './utils/gameStateManager';
 import { initializeWordLists } from './utils/aiOpponent';
+import { 
+  errorHandler, 
+  notFoundHandler
+} from './middleware/errorHandler';
+import { MatchmakingManager } from './utils/matchmaking';
 
 const app = express();
 
@@ -22,20 +27,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Middleware for plain text body parsing
 app.use(express.text());
-
-// Error handling middleware
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Server error:', err);
-  
-  const errorResponse: ApiResponse = {
-    success: false,
-    error: 'Internal server error',
-    code: 'SERVER_ERROR',
-    retryable: true
-  };
-  
-  res.status(500).json(errorResponse);
-});
 
 const router = express.Router();
 
@@ -237,10 +228,21 @@ router.post('/api/submit-guess', async (req, res) => {
     // Submit the guess
     const result = await GameStateManager.submitGuess(gameId, playerId, normalizedGuess);
     
+    // Get score breakdown if game ended
+    let scoreBreakdown;
+    if (result.gameEnded && result.gameState.status === 'finished') {
+      const currentPlayer = result.gameState.player1.id === playerId ? result.gameState.player1 : result.gameState.player2;
+      const won = result.gameState.winner === 'player1' && currentPlayer.id === result.gameState.player1.id ||
+                  result.gameState.winner === 'player2' && currentPlayer.id === result.gameState.player2.id;
+      
+      scoreBreakdown = GameStateManager.getPlayerScoreBreakdown(currentPlayer, result.gameState, won);
+    }
+    
     res.json(formatResponse({
       gameState: result.gameState,
       guessResult: result.guessResult,
-      gameEnded: result.gameEnded
+      gameEnded: result.gameEnded,
+      ...(scoreBreakdown && { scoreBreakdown })
     }));
     
   } catch (error) {
@@ -322,7 +324,7 @@ router.get('/api/get-game-state/:gameId', async (req, res) => {
       ));
     }
     
-    const gameState = await GameStateManager.getGameStateForClient(gameId, playerId);
+    const gameState = await GameStateManager.getGameStateForClientWithActivity(gameId, playerId);
     
     if (!gameState) {
       return res.status(404).json(formatResponse(
@@ -332,7 +334,20 @@ router.get('/api/get-game-state/:gameId', async (req, res) => {
       ));
     }
     
-    res.json(formatResponse({ gameState }));
+    // Get score breakdown if game is finished
+    let scoreBreakdown;
+    if (gameState.status === 'finished') {
+      const currentPlayer = gameState.player1.id === playerId ? gameState.player1 : gameState.player2;
+      const won = gameState.winner === 'player1' && currentPlayer.id === gameState.player1.id ||
+                  gameState.winner === 'player2' && currentPlayer.id === gameState.player2.id;
+      
+      scoreBreakdown = GameStateManager.getPlayerScoreBreakdown(currentPlayer, gameState, won);
+    }
+    
+    res.json(formatResponse({ 
+      gameState,
+      ...(scoreBreakdown && { scoreBreakdown })
+    }));
     
   } catch (error) {
     console.error('Get game state error:', error);
@@ -348,7 +363,8 @@ router.get('/api/get-game-state/:gameId', async (req, res) => {
 // Create single player game endpoint
 router.post('/api/create-game', async (req, res) => {
   try {
-    const { playerId, playerUsername, playerSecretWord, wordLength, difficulty, mode } = req.body;
+    const { playerId, playerSecretWord, wordLength, difficulty, mode } = req.body;
+    let { playerUsername } = req.body;
     
     // Validate required fields
     if (!playerId || !playerUsername || !playerSecretWord || !wordLength || !mode) {
@@ -387,6 +403,21 @@ router.post('/api/create-game', async (req, res) => {
         ));
       }
       
+      // Try to get Reddit user information for username verification
+      try {
+        const formattedPlayerId = playerId.startsWith('t2_') ? playerId : `t2_${playerId}`;
+        const user = await reddit.getUserById(formattedPlayerId as `t2_${string}`);
+        if (user && user.username !== playerUsername) {
+          // Update username if it differs (in case of username changes)
+          playerUsername = user.username;
+        }
+      } catch (error) {
+        console.log(`Could not fetch Reddit user info for ${playerId}:`, error);
+      }
+      
+      // Initialize user data (profile pictures will use username-based avatars for now)
+      await RedisDataAccess.initializeUserData(playerId, playerUsername);
+      
       // Create single player game
       const gameState = await GameStateManager.createSinglePlayerGame(
         playerId,
@@ -403,12 +434,42 @@ router.post('/api/create-game', async (req, res) => {
       }));
       
     } else if (mode === 'multi') {
-      // TODO: Implement multiplayer game creation
-      return res.status(501).json(formatResponse(
-        undefined,
-        'Multiplayer mode not yet implemented',
-        'VALIDATION_ERROR'
-      ));
+      // Initialize user data for multiplayer
+      try {
+        const formattedPlayerId = playerId.startsWith('t2_') ? playerId : `t2_${playerId}`;
+        const user = await reddit.getUserById(formattedPlayerId as `t2_${string}`);
+        if (user && user.username !== playerUsername) {
+          playerUsername = user.username;
+        }
+      } catch (error) {
+        console.log(`Could not fetch Reddit user info for ${playerId}:`, error);
+      }
+      
+      await RedisDataAccess.initializeUserData(playerId, playerUsername);
+      
+      // Join matchmaking queue
+      const matchResult = await MatchmakingManager.joinQueue({
+        playerId,
+        playerUsername,
+        playerSecretWord: playerSecretWord.toUpperCase().trim(),
+        wordLength,
+        timestamp: Date.now()
+      });
+      
+      if (matchResult.matched) {
+        // Match found, return game state
+        res.json(formatResponse({
+          gameId: matchResult.gameId,
+          status: 'ready',
+          gameState: matchResult.gameState
+        }));
+      } else {
+        // Added to queue, return waiting status
+        res.json(formatResponse({
+          gameId: '',
+          status: 'waiting'
+        }));
+      }
     } else {
       return res.status(400).json(formatResponse(
         undefined,
@@ -451,10 +512,21 @@ router.post('/api/ai-guess/:gameId', async (req, res) => {
       ));
     }
     
+    // Get score breakdown if game ended (for human player)
+    let scoreBreakdown;
+    if (result.gameEnded && result.gameState.status === 'finished') {
+      const humanPlayer = result.gameState.player1.isAI ? result.gameState.player2 : result.gameState.player1;
+      const won = result.gameState.winner === 'player1' && humanPlayer.id === result.gameState.player1.id ||
+                  result.gameState.winner === 'player2' && humanPlayer.id === result.gameState.player2.id;
+      
+      scoreBreakdown = GameStateManager.getPlayerScoreBreakdown(humanPlayer, result.gameState, won);
+    }
+    
     res.json(formatResponse({
       gameState: result.gameState,
       guessResult: result.guessResult,
-      gameEnded: result.gameEnded
+      gameEnded: result.gameEnded,
+      ...(scoreBreakdown && { scoreBreakdown })
     }));
     
   } catch (error) {
@@ -499,24 +571,529 @@ router.get('/api/ai-timing/:difficulty', async (req, res) => {
   }
 });
 
-// Get leaderboard endpoint
-router.get('/api/get-leaderboard', async (_req, res) => {
+// Get user profile endpoint
+router.get('/api/get-user-profile', async (_req, res) => {
   try {
-    const leaderboardData = await RedisDataAccess.getLeaderboard(10);
+    const { userId } = context;
     
-    // Get user data for each leaderboard entry
+    if (!userId) {
+      return res.status(401).json(formatResponse(
+        undefined,
+        'User not authenticated',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Ensure userId has the correct format (t2_ prefix)
+    const formattedUserId = userId.startsWith('t2_') ? userId : `t2_${userId}`;
+    
+    // Get Reddit user information
+    const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
+    
+    if (!user) {
+      return res.status(404).json(formatResponse(
+        undefined,
+        'User not found',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Extract profile information with fallbacks
+    // Note: Current Devvit API doesn't expose profile images, so we use a default profile icon
+    const profileData = {
+      userId: user.id,
+      username: user.username,
+      profilePicture: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
+      isRedditProfile: false // Profile images not available in current Devvit API
+    };
+    
+    res.json(formatResponse({ profile: profileData }));
+    
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    
+    // Fallback to username-only profile if Reddit API fails
+    try {
+      const username = await reddit.getCurrentUsername();
+      const fallbackProfile = {
+        userId: context.userId || 'unknown',
+        username: username || 'Anonymous',
+        profilePicture: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
+        isRedditProfile: false
+      };
+      
+      res.json(formatResponse({ profile: fallbackProfile }));
+    } catch (fallbackError) {
+      console.error('Fallback profile error:', fallbackError);
+      res.status(500).json(formatResponse(
+        undefined,
+        'Failed to retrieve user profile',
+        'SERVER_ERROR',
+        true
+      ));
+    }
+  }
+});
+
+// Matchmaking endpoints
+
+// Check matchmaking status
+router.get('/api/matchmaking-status/:wordLength/:playerId', async (req, res) => {
+  try {
+    const { wordLength, playerId } = req.params;
+    
+    if (!wordLength || !playerId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Word length and player ID are required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    const wordLengthNum = parseInt(wordLength);
+    if (wordLengthNum !== 4 && wordLengthNum !== 5) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Word length must be 4 or 5',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    const isInQueue = await MatchmakingManager.isPlayerInQueue(playerId, wordLengthNum as 4 | 5);
+    const queueStatus = await MatchmakingManager.getQueueStatus(wordLengthNum as 4 | 5);
+    
+    res.json(formatResponse({
+      inQueue: isInQueue,
+      playersWaiting: queueStatus.playersWaiting,
+      averageWaitTime: queueStatus.averageWaitTime
+    }));
+    
+  } catch (error) {
+    console.error('Matchmaking status error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to get matchmaking status',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Leave matchmaking queue
+router.post('/api/leave-queue', async (req, res) => {
+  try {
+    const { playerId, wordLength } = req.body;
+    
+    if (!playerId || !wordLength) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Player ID and word length are required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    if (wordLength !== 4 && wordLength !== 5) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Word length must be 4 or 5',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    await MatchmakingManager.leaveQueue(playerId, wordLength);
+    
+    res.json(formatResponse({
+      success: true,
+      message: 'Left matchmaking queue'
+    }));
+    
+  } catch (error) {
+    console.error('Leave queue error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to leave queue',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Check for match (poll for game creation)
+router.get('/api/check-match/:playerId', async (req, res) => {
+  try {
+    const { playerId } = req.params;
+    
+    if (!playerId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Player ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Check if player has been matched to a game
+    const gameId = await MatchmakingManager.getPlayerGame(playerId);
+    
+    if (gameId) {
+      // Verify the game exists and is valid
+      const gameState = await RedisDataAccess.getGameState(gameId);
+      if (gameState && gameState.status === 'active') {
+        res.json(formatResponse({
+          matchFound: true,
+          gameId,
+          gameState
+        }));
+        return;
+      } else {
+        // Game doesn't exist or is not active, clean up the mapping
+        await MatchmakingManager.removePlayerGame(playerId);
+      }
+    }
+    
+    res.json(formatResponse({
+      matchFound: false,
+      gameId: null
+    }));
+    
+  } catch (error) {
+    console.error('Check match error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to check for match',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Get all queues status (for admin/debugging)
+router.get('/api/queues-status', async (_req, res) => {
+  try {
+    const status = await MatchmakingManager.getAllQueuesStatus();
+    res.json(formatResponse(status));
+  } catch (error) {
+    console.error('Get queues status error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to get queues status',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Validate multiplayer game synchronization
+router.get('/api/validate-sync/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    
+    if (!gameId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Game ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    const validation = await GameStateManager.validateMultiplayerSync(gameId);
+    
+    res.json(formatResponse({
+      gameId,
+      isValid: validation.isValid,
+      issues: validation.issues
+    }));
+    
+  } catch (error) {
+    console.error('Validate sync error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to validate synchronization',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Force end multiplayer game due to sync issues
+router.post('/api/force-end-game/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { reason } = req.body;
+    
+    if (!gameId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Game ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    if (!reason || !['timeout', 'disconnection', 'sync_error'].includes(reason)) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Valid reason is required (timeout, disconnection, sync_error)',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    const gameState = await GameStateManager.forceEndMultiplayerGame(gameId, reason);
+    
+    if (!gameState) {
+      return res.status(404).json(formatResponse(
+        undefined,
+        'Game not found or not a multiplayer game',
+        'GAME_ERROR'
+      ));
+    }
+    
+    res.json(formatResponse({
+      gameId,
+      gameState,
+      reason
+    }));
+    
+  } catch (error) {
+    console.error('Force end game error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to force end game',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Skip turn due to timeout in multiplayer games
+router.post('/api/skip-turn/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { playerId } = req.body;
+    
+    if (!gameId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Game ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    if (!playerId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Player ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Validate game access
+    const hasAccess = await GameStateManager.validateGameAccess(gameId, playerId);
+    if (!hasAccess) {
+      return res.status(403).json(formatResponse(
+        undefined,
+        'Access denied to this game',
+        'GAME_ERROR'
+      ));
+    }
+    
+    const result = await GameStateManager.skipTurnDueToTimeout(gameId, playerId);
+    
+    if (!result) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Cannot skip turn at this time',
+        'GAME_ERROR'
+      ));
+    }
+    
+    res.json(formatResponse({
+      gameState: result.gameState,
+      turnSkipped: true,
+      reason: 'timeout'
+    }));
+    
+  } catch (error) {
+    console.error('Skip turn error:', error);
+    
+    // Handle specific game errors
+    if (error instanceof Error) {
+      if (error.message === 'Game not found') {
+        return res.status(404).json(formatResponse(
+          undefined,
+          'Game not found',
+          'GAME_ERROR'
+        ));
+      }
+      
+      if (error.message === 'Game is not active') {
+        return res.status(400).json(formatResponse(
+          undefined,
+          'Game is not active',
+          'GAME_ERROR'
+        ));
+      }
+      
+      if (error.message === 'Not your turn') {
+        return res.status(400).json(formatResponse(
+          undefined,
+          'Not your turn',
+          'GAME_ERROR'
+        ));
+      }
+    }
+    
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to skip turn',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Enhanced multiplayer game state endpoint with automatic cleanup
+router.get('/api/get-multiplayer-game/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { playerId } = req.query;
+    
+    if (!gameId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Game ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    if (!playerId || typeof playerId !== 'string') {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Player ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Validate game access
+    const hasAccess = await GameStateManager.validateGameAccess(gameId, playerId);
+    if (!hasAccess) {
+      return res.status(403).json(formatResponse(
+        undefined,
+        'Access denied to this game',
+        'GAME_ERROR'
+      ));
+    }
+    
+    const gameState = await GameStateManager.getMultiplayerGameWithCleanup(gameId, playerId);
+    
+    if (!gameState) {
+      return res.status(404).json(formatResponse(
+        undefined,
+        'Game not found',
+        'GAME_ERROR'
+      ));
+    }
+    
+    // Get score breakdown if game is finished
+    let scoreBreakdown;
+    if (gameState.status === 'finished') {
+      const currentPlayer = gameState.player1.id === playerId ? gameState.player1 : gameState.player2;
+      const won = gameState.winner === 'player1' && currentPlayer.id === gameState.player1.id ||
+                  gameState.winner === 'player2' && currentPlayer.id === gameState.player2.id;
+      
+      scoreBreakdown = GameStateManager.getPlayerScoreBreakdown(currentPlayer, gameState, won);
+    }
+    
+    res.json(formatResponse({ 
+      gameState,
+      ...(scoreBreakdown && { scoreBreakdown })
+    }));
+    
+  } catch (error) {
+    console.error('Get multiplayer game error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to retrieve multiplayer game state',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Get leaderboard endpoint
+router.get('/api/get-leaderboard', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100; // Default to 100 players
+    const currentUserId = req.query.currentUserId as string;
+    
+    const leaderboardData = await RedisDataAccess.getLeaderboard(limit);
+    
+    // Get current player's rank if provided
+    let currentPlayerRank = null;
+    if (currentUserId) {
+      currentPlayerRank = await RedisDataAccess.getPlayerRank(currentUserId);
+    }
+    
+    // Get user data for each leaderboard entry with Reddit profile integration
     const leaderboard = await Promise.all(
-      leaderboardData.map(async (entry, index) => {
+      leaderboardData.map(async (entry) => {
         const userData = await RedisDataAccess.getUserData(entry.userId);
+        let profilePicture = userData?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+        let username = userData?.username || 'Unknown';
+        
+        // Try to get updated Reddit username
+        try {
+          const formattedUserId = entry.userId.startsWith('t2_') ? entry.userId : `t2_${entry.userId}`;
+          const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
+          if (user) {
+            username = user.username;
+            // Use default profile icon for all users
+            profilePicture = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+          }
+        } catch (error) {
+          // Use stored data as fallback
+          console.log(`Could not fetch Reddit user info for ${entry.userId}:`, error);
+        }
+        
         return {
-          username: userData?.username || 'Unknown',
+          username,
+          profilePicture,
           points: entry.points,
-          rank: index + 1
+          rank: entry.rank,
+          userId: entry.userId
         };
       })
     );
     
-    res.json(formatResponse({ leaderboard }));
+    // If current player is not in top 100 but has a rank, get their data
+    let currentPlayerData = null;
+    if (currentPlayerRank && !leaderboard.find(entry => entry.userId === currentUserId)) {
+      const userData = await RedisDataAccess.getUserData(currentUserId);
+      let profilePicture = userData?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+      let username = userData?.username || 'Unknown';
+      
+      try {
+        const formattedUserId = currentUserId.startsWith('t2_') ? currentUserId : `t2_${currentUserId}`;
+        const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
+        if (user) {
+          username = user.username;
+          profilePicture = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
+        }
+      } catch (error) {
+        console.log(`Could not fetch Reddit user info for current user ${currentUserId}:`, error);
+      }
+      
+      currentPlayerData = {
+        username,
+        profilePicture,
+        points: currentPlayerRank.points,
+        rank: currentPlayerRank.rank,
+        userId: currentUserId
+      };
+    }
+    
+    res.json(formatResponse({ 
+      leaderboard,
+      currentPlayerData
+    }));
     
   } catch (error) {
     console.error('Get leaderboard error:', error);
@@ -566,14 +1143,9 @@ router.post('/internal/menu/post-create', async (_req, res): Promise<void> => {
 // Use router middleware
 app.use(router);
 
-// Global error handler (must be last)
-app.use((_req: express.Request, res: express.Response) => {
-  res.status(404).json(formatResponse(
-    undefined,
-    'Endpoint not found',
-    'VALIDATION_ERROR'
-  ));
-});
+// Global error handlers (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Get port from environment variable with fallback
 const port = getServerPort();
