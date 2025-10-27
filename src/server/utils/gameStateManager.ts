@@ -521,35 +521,38 @@ export class GameStateManager {
     gameId: string,
     playerId: string
   ): Promise<GameState | null> {
-    const gameState = await this.getGameStateForClient(gameId, playerId);
+    // Get UNSANITIZED game state first to check for disconnection
+    const rawGameState = await RedisDataAccess.getGameState(gameId);
     
-    if (!gameState) return null;
+    if (!rawGameState) return null;
     
     // Update player activity for multiplayer games
-    if (gameState.mode === 'multi' && gameState.status === 'active') {
+    if (rawGameState.mode === 'multi' && rawGameState.status === 'active') {
       await this.updatePlayerActivity(gameId, playerId);
       
-      // Check for opponent disconnection
-      const disconnectedPlayer = await this.checkPlayerDisconnection(gameState, playerId);
+      // Check for opponent disconnection using RAW game state
+      const disconnectedPlayer = await this.checkPlayerDisconnection(rawGameState, playerId);
       if (disconnectedPlayer) {
-        // Update game state to reflect disconnection
-        gameState.status = 'finished';
-        gameState.winner = gameState.player1.id === playerId ? 'player1' : 'player2';
+        // Update UNSANITIZED game state to reflect disconnection
+        rawGameState.status = 'finished';
+        rawGameState.winner = rawGameState.player1.id === playerId ? 'player1' : 'player2';
         
         // Add definitions for both players' secret words
-        gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
-        gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+        rawGameState.player1.secretWordDefinition = getDefinition(rawGameState.player1.secretWord) || 'a word';
+        rawGameState.player2.secretWordDefinition = getDefinition(rawGameState.player2.secretWord) || 'a word';
         
         // Update statistics for disconnection scenario
-        if (!gameState.statisticsUpdated) {
-          await this.updateDisconnectionStatistics(gameState, disconnectedPlayer.id);
-          gameState.statisticsUpdated = true;
+        if (!rawGameState.statisticsUpdated) {
+          await this.updateDisconnectionStatistics(rawGameState, disconnectedPlayer.id);
+          rawGameState.statisticsUpdated = true;
         }
         
-        await this.saveGameStateAtomic(gameId, gameState);
+        await this.saveGameStateAtomic(gameId, rawGameState);
       }
     }
     
+    // NOW get the sanitized version for the client
+    const gameState = await this.getGameStateForClient(gameId, playerId);
     return gameState;
   }
   

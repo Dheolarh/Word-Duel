@@ -1,5 +1,5 @@
 {
-  "name": "words-duel",
+  "name": "word-duel",
   "post": {
     "dir": "dist/client",
     "entrypoints": {
@@ -22,7 +22,7 @@
     "items": [
       {
         "label": "Create a new post",
-        "description": "words-duel",
+        "description": "word-duel",
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/post-create"

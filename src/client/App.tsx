@@ -11,6 +11,7 @@ import { Searching } from './pages/Searching';
 import { Game } from './pages/Game';
 import background from './assets/themes/Default/Background.webp';
 import { ApiResponse } from '../shared/types/api';
+import { getCurrentUserProfile } from './utils/userProfile';
 import { GameState } from '../shared/types/game';
 import { ErrorHandler, ErrorInfo } from './utils/errorHandling';
 
@@ -29,8 +30,21 @@ export const App = () => {
   const [currentPage, setCurrentPage] = useState<Page>('splash');
   const [gameConfig, setGameConfig] = useState<GameConfig | null>(null);
   const [errorModal, setErrorModal] = useState<ErrorInfo | null>(null);
+  const [userProfile, setUserProfile] = useState<{ userId: string; username: string } | null>(null);
+  // Generate unique session ID for playtest mode when user is not logged in
+  const [sessionId] = useState(() => 'session-' + Math.random().toString(36).substr(2, 9));
 
   useEffect(() => {
+    // Fetch Reddit / anon user profile from server once on app start so we can display username
+    (async () => {
+      try {
+        const profile = await getCurrentUserProfile();
+        if (profile) setUserProfile({ userId: profile.userId, username: profile.username });
+      } catch (e) {
+        console.warn('Failed to fetch user profile:', e);
+      }
+    })();
+
     // Start background music when dashboard loads (audio is enabled in splash screen)
     if (currentPage === 'dashboard') {
       // Small delay to ensure smooth transition
@@ -58,8 +72,8 @@ export const App = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          playerId: 'current-user', // TODO: Get actual user ID from Reddit context
-          playerUsername: 'Player', // TODO: Get actual username from Reddit context
+          playerId: userProfile?.userId || sessionId,
+          playerUsername: userProfile?.username || 'Player',
           playerSecretWord: secretWord,
           wordLength: wordLength,
           mode: 'multi'
@@ -113,8 +127,8 @@ export const App = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          playerId: 'current-user', // TODO: Get actual user ID from Reddit context
-          playerUsername: 'Player', // TODO: Get actual username from Reddit context
+          playerId: userProfile?.userId || sessionId,
+          playerUsername: userProfile?.username || 'Player',
           playerSecretWord: gameConfig.secretWord,
           wordLength: gameConfig.wordLength,
           difficulty,
@@ -152,7 +166,7 @@ export const App = () => {
     
     try {
       // Fetch the game state for the matched game
-      const response = await fetch(`/api/get-game-state/${gameId}?playerId=current-user`);
+      const response = await fetch(`/api/get-game-state/${gameId}?playerId=${encodeURIComponent(userProfile?.userId || 'current-user')}`);
       const data: ApiResponse<{ gameState: GameState }> = await response.json();
       
       if (data.success && data.data) {
@@ -241,7 +255,7 @@ export const App = () => {
             {currentPage === 'searching' && gameConfig && (
               <motion.div key="searching" {...pageTransition}>
                 <Searching 
-                  playerId="current-user" // TODO: Get actual user ID from Reddit context
+                  playerId={userProfile?.userId || sessionId}
                   wordLength={gameConfig.wordLength as 4 | 5}
                   onMatchFound={handleMatchFound}
                   onBack={() => setCurrentPage('pregame')}
@@ -259,6 +273,7 @@ export const App = () => {
                   secretWord={gameConfig.secretWord}
                   difficulty={gameConfig.difficulty || 'easy'}
                   isMultiplayer={gameConfig.isMultiplayer}
+                  playerId={userProfile?.userId || sessionId}
                   onExit={handleExitGame}
                 />
               </motion.div>

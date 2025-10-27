@@ -1,6 +1,5 @@
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { SoundButton } from './SoundButton';
-import { playSound, sounds } from '../utils/sound';
 
 interface KeyboardProps {
   onKeyPress: (key: string) => void;
@@ -25,7 +24,6 @@ export function Keyboard({ onKeyPress, onEnter, onDelete, keyFeedback }: Keyboar
   };
 
   const handleKeyClick = (key: string) => {
-    // Sound is now handled by SoundButton wrapper
     if (key === 'ENTER') {
       onEnter();
     } else if (key === 'DEL') {

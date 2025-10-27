@@ -26,6 +26,7 @@ interface GameProps {
   secretWord: string;
   difficulty?: 'easy' | 'medium' | 'difficult';
   isMultiplayer: boolean;
+  playerId: string;
   onExit: () => void;
 }
 
@@ -35,6 +36,7 @@ export function Game({
   wordLength,
   difficulty,
   isMultiplayer,
+  playerId,
   onExit,
 }: GameProps) {
   const [currentGuess, setCurrentGuess] = useState('');
@@ -73,14 +75,18 @@ export function Game({
   let opponentPlayer: PlayerState;
   
   if (isMultiplayer) {
-    // For multiplayer, determine based on actual user ID from profile
-    const currentUserId = userProfile?.userId || 'current-user';
-    if (gameState?.player1.id === currentUserId) {
+    // For multiplayer, determine based on the playerId prop (already resolved correctly)
+    if (gameState?.player1.id === playerId) {
       currentPlayer = gameState.player1;
       opponentPlayer = gameState.player2;
+    } else if (gameState?.player2.id === playerId) {
+      currentPlayer = gameState.player2;
+      opponentPlayer = gameState.player1;
     } else {
-      currentPlayer = gameState?.player2 || gameState?.player1;
-      opponentPlayer = gameState?.player1 || gameState?.player2;
+      // Fallback: couldn't match playerId, default to player1
+      console.warn('Player ID mismatch in multiplayer game. playerId:', playerId, 'player1.id:', gameState?.player1.id, 'player2.id:', gameState?.player2.id);
+      currentPlayer = gameState?.player1 || gameState?.player2!;
+      opponentPlayer = gameState?.player2 || gameState?.player1!;
     }
   } else {
     // For single player, determine based on who is AI
@@ -158,11 +164,8 @@ export function Game({
   // Submit guess to API
   const submitGuess = async (guess: string): Promise<boolean> => {
     setIsSubmittingGuess(true);
-
+    
     try {
-      // Use actual user ID for multiplayer games
-      const playerId = isMultiplayer ? (userProfile?.userId || 'current-user') : 'current-user';
-      
       const response = await fetch('/api/submit-guess', {
         method: 'POST',
         headers: {
@@ -220,7 +223,7 @@ export function Game({
   const updateGameStatus = (state: GameState) => {
     if (state.status === 'finished') {
       // Determine if current player won based on winner and player ID
-      const currentPlayerId = isMultiplayer ? (userProfile?.userId || 'current-user') : currentPlayer.id;
+      const currentPlayerId = isMultiplayer ? playerId : currentPlayer.id;
       
       if (state.winner === 'draw') {
         setGameStatus('draw');
@@ -238,9 +241,6 @@ export function Game({
   // Poll for game state updates and trigger AI moves when it's AI's turn
   const pollGameState = async () => {
     try {
-      // Use actual user ID for multiplayer games
-      const playerId = isMultiplayer ? (userProfile?.userId || 'current-user') : 'current-user';
-      
       // Use multiplayer-specific endpoint for multiplayer games
       const endpoint = isMultiplayer 
         ? `/api/get-multiplayer-game/${gameId}?playerId=${playerId}`
@@ -303,8 +303,6 @@ export function Game({
     if (!isMultiplayer || gameStatus !== 'playing') return;
     
     try {
-      const playerId = userProfile?.userId || 'current-user';
-      
       const response = await fetch(`/api/skip-turn/${gameId}`, {
         method: 'POST',
         headers: {

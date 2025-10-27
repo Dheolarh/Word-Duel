@@ -2,6 +2,7 @@ import express from 'express';
 import { InitResponse, IncrementResponse, DecrementResponse } from '../shared/types/api';
 import { redis, reddit, createServer, context, getServerPort } from '@devvit/web/server';
 import { createPost } from './core/post';
+import { assignAnonName } from './utils/anonNames';
 import { RedisDataAccess, formatResponse } from './main';
 import { isValidWordFormat } from './utils/gameUtils';
 import { validateWordWithDictionary } from './services/dictionaryApi';
@@ -28,7 +29,52 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware for plain text body parsing
 app.use(express.text());
 
+// Debug middleware: print Devvit context for each incoming request to help diagnose
+// whether the playtest runtime is attaching user/subreddit/post context correctly.
+app.use(async (req, _res, next) => {
+  try {
+    // For debugging, resolve the display name from our persisted user data
+    // rather than calling Reddit again. This ensures that playtest/runtime
+    // logs show the anon username assigned to this userId.
+    let resolvedUsername: string | undefined = undefined;
+    try {
+      const userId = context.userId;
+      if (userId) {
+        const userData = await RedisDataAccess.getUserData(userId);
+        if (userData && userData.username) {
+          resolvedUsername = userData.username;
+        }
+      }
+    } catch (e) {
+      // ignore errors resolving from Redis
+      resolvedUsername = undefined;
+    }
+
+    console.log('[DEVVIT_CONTEXT]', {
+      path: req.path,
+      method: req.method,
+      userId: context.userId,
+      resolvedUsername,
+      subredditName: context.subredditName,
+      postId: context.postId,
+    });
+  } catch (e) {
+    console.warn('Failed to read devvit context for request', req.path, e);
+  }
+  next();
+});
+
 const router = express.Router();
+
+// Helper to normalize client-side placeholder IDs like 'current-user'
+const resolvePlayerId = (rawId?: string) => {
+  if (!rawId) return rawId;
+  if (rawId === 'current-user' || rawId.includes('current-user')) {
+    // Fall back to Devvit context userId when available
+    return context.userId || rawId;
+  }
+  return rawId;
+};
 
 // Legacy endpoints (keeping for compatibility)
 router.get<{ postId: string }, InitResponse | { status: string; message: string }>(
@@ -183,7 +229,8 @@ router.post('/api/validate-word', async (req, res) => {
 // Submit guess endpoint
 router.post('/api/submit-guess', async (req, res) => {
   try {
-    const { gameId, playerId, guess } = req.body;
+  const { gameId, playerId: rawPlayerId, guess } = req.body;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     // Validate required fields
     if (!gameId || !playerId || !guess) {
@@ -296,7 +343,8 @@ router.post('/api/submit-guess', async (req, res) => {
 router.get('/api/get-game-state/:gameId', async (req, res) => {
   try {
     const { gameId } = req.params;
-    const { playerId } = req.query;
+  const { playerId: rawPlayerId } = req.query;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!gameId) {
       return res.status(400).json(formatResponse(
@@ -363,7 +411,8 @@ router.get('/api/get-game-state/:gameId', async (req, res) => {
 // Create single player game endpoint
 router.post('/api/create-game', async (req, res) => {
   try {
-    const { playerId, playerSecretWord, wordLength, difficulty, mode } = req.body;
+  let { playerId: rawPlayerId, playerSecretWord, wordLength, difficulty, mode } = req.body;
+  let playerId = resolvePlayerId(rawPlayerId as string);
     let { playerUsername } = req.body;
     
     // Validate required fields
@@ -403,18 +452,28 @@ router.post('/api/create-game', async (req, res) => {
         ));
       }
       
-      // Try to get Reddit user information for username verification
-      try {
-        const formattedPlayerId = playerId.startsWith('t2_') ? playerId : `t2_${playerId}`;
-        const user = await reddit.getUserById(formattedPlayerId as `t2_${string}`);
-        if (user && user.username !== playerUsername) {
-          // Update username if it differs (in case of username changes)
-          playerUsername = user.username;
+      // Prefer persisted username from Redis if available
+      if (playerId && !playerId.includes('current-user')) {
+        try {
+          const stored = await RedisDataAccess.getUserData(playerId);
+          if (stored && stored.username) {
+            playerUsername = stored.username;
+          }
+        } catch (e) {
+          console.warn('Error reading stored user data for', playerId, e);
         }
-      } catch (error) {
-        console.log(`Could not fetch Reddit user info for ${playerId}:`, error);
       }
       
+      // If we still don't have a usable username, assign a persistent anon name
+      if (playerId && !playerId.includes('current-user') && (!playerUsername || playerUsername === 'Player' || playerUsername === 'Anonymous' || playerUsername === 'unknown')) {
+        try {
+          playerUsername = await assignAnonName(playerId);
+        } catch (e) {
+          console.warn('Failed to assign anon name for', playerId, e);
+          playerUsername = playerUsername || 'Player';
+        }
+      }
+
       // Initialize user data (profile pictures will use username-based avatars for now)
       await RedisDataAccess.initializeUserData(playerId, playerUsername);
       
@@ -435,16 +494,27 @@ router.post('/api/create-game', async (req, res) => {
       
     } else if (mode === 'multi') {
       // Initialize user data for multiplayer
-      try {
-        const formattedPlayerId = playerId.startsWith('t2_') ? playerId : `t2_${playerId}`;
-        const user = await reddit.getUserById(formattedPlayerId as `t2_${string}`);
-        if (user && user.username !== playerUsername) {
-          playerUsername = user.username;
+      if (playerId && !playerId.includes('current-user')) {
+        try {
+          const stored = await RedisDataAccess.getUserData(playerId);
+          if (stored && stored.username) {
+            playerUsername = stored.username;
+          }
+        } catch (e) {
+          console.warn('Error reading stored user data for', playerId, e);
         }
-      } catch (error) {
-        console.log(`Could not fetch Reddit user info for ${playerId}:`, error);
       }
       
+      // If username is still missing for multiplayer, assign an anon username
+      if (playerId && !playerId.includes('current-user') && (!playerUsername || playerUsername === 'Player' || playerUsername === 'Anonymous' || playerUsername === 'unknown')) {
+        try {
+          playerUsername = await assignAnonName(playerId);
+        } catch (e) {
+          console.warn('Failed to assign anon name for', playerId, e);
+          playerUsername = playerUsername || 'Player';
+        }
+      }
+
       await RedisDataAccess.initializeUserData(playerId, playerUsername);
       
       // Join matchmaking queue
@@ -457,11 +527,19 @@ router.post('/api/create-game', async (req, res) => {
       });
       
       if (matchResult.matched) {
-        // Match found, return game state
+        // Match found, return game state (sanitized for client)
+        const sanitizedGameState = await GameStateManager.getGameStateForClient(matchResult.gameId, playerId);
+        if (!sanitizedGameState) {
+          return res.status(404).json(formatResponse(
+            undefined,
+            'Game state not found',
+            'GAME_ERROR'
+          ));
+        }
         res.json(formatResponse({
           gameId: matchResult.gameId,
           status: 'ready',
-          gameState: matchResult.gameState
+          gameState: sanitizedGameState
         }));
       } else {
         // Added to queue, return waiting status
@@ -583,55 +661,73 @@ router.get('/api/get-user-profile', async (_req, res) => {
         'VALIDATION_ERROR'
       ));
     }
-    
-    // Ensure userId has the correct format (t2_ prefix)
-    const formattedUserId = userId.startsWith('t2_') ? userId : `t2_${userId}`;
-    
-    // Get Reddit user information
-    const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
-    
-    if (!user) {
-      return res.status(404).json(formatResponse(
-        undefined,
-        'User not found',
-        'VALIDATION_ERROR'
-      ));
+    // Prefer our persisted user data (may contain assigned anon name)
+    const userData = await RedisDataAccess.getUserData(userId);
+    if (userData && userData.username) {
+      const profileData = {
+        userId,
+        username: userData.username,
+        profilePicture: userData.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
+        isRedditProfile: userData.isRedditProfile || false
+      };
+      return res.json(formatResponse({ profile: profileData }));
     }
-    
-    // Extract profile information with fallbacks
-    // Note: Current Devvit API doesn't expose profile images, so we use a default profile icon
-    const profileData = {
-      userId: user.id,
-      username: user.username,
-      profilePicture: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
-      isRedditProfile: false // Profile images not available in current Devvit API
-    };
-    
-    res.json(formatResponse({ profile: profileData }));
-    
-  } catch (error) {
-    console.error('Get user profile error:', error);
-    
-    // Fallback to username-only profile if Reddit API fails
+
+    // No persisted data — assign an anon name and initialize user data
     try {
-      const username = await reddit.getCurrentUsername();
-      const fallbackProfile = {
-        userId: context.userId || 'unknown',
-        username: username || 'Anonymous',
+      const anon = await assignAnonName(userId);
+      await RedisDataAccess.initializeUserData(userId, anon);
+      const profileData = {
+        userId,
+        username: anon,
         profilePicture: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+',
         isRedditProfile: false
       };
-      
-      res.json(formatResponse({ profile: fallbackProfile }));
-    } catch (fallbackError) {
-      console.error('Fallback profile error:', fallbackError);
-      res.status(500).json(formatResponse(
-        undefined,
-        'Failed to retrieve user profile',
-        'SERVER_ERROR',
-        true
-      ));
+      return res.json(formatResponse({ profile: profileData }));
+    } catch (e) {
+      console.error('Failed to assign anon name:', e);
+      return res.status(500).json(formatResponse(undefined, 'Failed to retrieve user profile', 'SERVER_ERROR', true));
     }
+    
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to retrieve user profile',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
+// Get assigned anonymous name for current user (assigns one if missing)
+router.get('/api/get-anon-name', async (_req, res) => {
+  try {
+    const { userId } = context;
+    if (!userId) {
+      return res.status(401).json(formatResponse(undefined, 'User not authenticated', 'VALIDATION_ERROR'));
+    }
+
+    // Ensure canonical form (use as-is, developer may normalize elsewhere)
+    const existing = await RedisDataAccess.getUserData(userId);
+    if (existing && existing.username && existing.username !== 'Anonymous' && existing.username !== 'Player') {
+      return res.json(formatResponse({ anonName: existing.username }));
+    }
+
+    // Try to get assigned anon name without overwriting existing mapping
+    const { assignAnonName, getAssignedAnonName } = await Promise.resolve(require('./utils/anonNames')) as any;
+    let anon = await getAssignedAnonName(userId);
+    if (!anon) {
+      anon = await assignAnonName(userId);
+    }
+
+    // Persist in Redis user data as well
+    await RedisDataAccess.initializeUserData(userId, anon);
+
+    res.json(formatResponse({ anonName: anon }));
+  } catch (error) {
+    console.error('Get anon name error:', error);
+    res.status(500).json(formatResponse(undefined, 'Failed to get anon name', 'SERVER_ERROR', true));
   }
 });
 
@@ -640,7 +736,8 @@ router.get('/api/get-user-profile', async (_req, res) => {
 // Check matchmaking status
 router.get('/api/matchmaking-status/:wordLength/:playerId', async (req, res) => {
   try {
-    const { wordLength, playerId } = req.params;
+  const { wordLength, playerId: rawPlayerId } = req.params;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!wordLength || !playerId) {
       return res.status(400).json(formatResponse(
@@ -682,7 +779,8 @@ router.get('/api/matchmaking-status/:wordLength/:playerId', async (req, res) => 
 // Leave matchmaking queue
 router.post('/api/leave-queue', async (req, res) => {
   try {
-    const { playerId, wordLength } = req.body;
+  const { playerId: rawPlayerId, wordLength } = req.body;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!playerId || !wordLength) {
       return res.status(400).json(formatResponse(
@@ -721,7 +819,8 @@ router.post('/api/leave-queue', async (req, res) => {
 // Check for match (poll for game creation)
 router.get('/api/check-match/:playerId', async (req, res) => {
   try {
-    const { playerId } = req.params;
+  const { playerId: rawPlayerId } = req.params;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!playerId) {
       return res.status(400).json(formatResponse(
@@ -738,12 +837,19 @@ router.get('/api/check-match/:playerId', async (req, res) => {
       // Verify the game exists and is valid
       const gameState = await RedisDataAccess.getGameState(gameId);
       if (gameState && gameState.status === 'active') {
-        res.json(formatResponse({
-          matchFound: true,
-          gameId,
-          gameState
-        }));
-        return;
+        // Return sanitized game state for client
+        const sanitizedGameState = await GameStateManager.getGameStateForClient(gameId, playerId);
+        if (!sanitizedGameState) {
+          // Game state not found, clean up the mapping
+          await MatchmakingManager.removePlayerGame(playerId);
+        } else {
+          res.json(formatResponse({
+            matchFound: true,
+            gameId,
+            gameState: sanitizedGameState
+          }));
+          return;
+        }
       } else {
         // Game doesn't exist or is not active, clean up the mapping
         await MatchmakingManager.removePlayerGame(playerId);
@@ -866,8 +972,9 @@ router.post('/api/force-end-game/:gameId', async (req, res) => {
 // Skip turn due to timeout in multiplayer games
 router.post('/api/skip-turn/:gameId', async (req, res) => {
   try {
-    const { gameId } = req.params;
-    const { playerId } = req.body;
+  const { gameId } = req.params;
+  const { playerId: rawPlayerId } = req.body;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!gameId) {
       return res.status(400).json(formatResponse(
@@ -953,8 +1060,9 @@ router.post('/api/skip-turn/:gameId', async (req, res) => {
 // Enhanced multiplayer game state endpoint with automatic cleanup
 router.get('/api/get-multiplayer-game/:gameId', async (req, res) => {
   try {
-    const { gameId } = req.params;
-    const { playerId } = req.query;
+  const { gameId } = req.params;
+  const { playerId: rawPlayerId } = req.query;
+  const playerId = resolvePlayerId(rawPlayerId as string);
     
     if (!gameId) {
       return res.status(400).json(formatResponse(
@@ -1021,8 +1129,8 @@ router.get('/api/get-multiplayer-game/:gameId', async (req, res) => {
 // Get leaderboard endpoint
 router.get('/api/get-leaderboard', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 100; // Default to 100 players
-    const currentUserId = req.query.currentUserId as string;
+  const limit = parseInt(req.query.limit as string) || 100; // Default to 100 players
+  const currentUserId = resolvePlayerId(req.query.currentUserId as string);
     
     const leaderboardData = await RedisDataAccess.getLeaderboard(limit);
     
@@ -1039,19 +1147,7 @@ router.get('/api/get-leaderboard', async (req, res) => {
         let profilePicture = userData?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
         let username = userData?.username || 'Unknown';
         
-        // Try to get updated Reddit username
-        try {
-          const formattedUserId = entry.userId.startsWith('t2_') ? entry.userId : `t2_${entry.userId}`;
-          const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
-          if (user) {
-            username = user.username;
-            // Use default profile icon for all users
-            profilePicture = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
-          }
-        } catch (error) {
-          // Use stored data as fallback
-          console.log(`Could not fetch Reddit user info for ${entry.userId}:`, error);
-        }
+        // Use stored user data only; do not call Reddit in playtest/runtime
         
         return {
           username,
@@ -1065,21 +1161,12 @@ router.get('/api/get-leaderboard', async (req, res) => {
     
     // If current player is not in top 100 but has a rank, get their data
     let currentPlayerData = null;
-    if (currentPlayerRank && !leaderboard.find(entry => entry.userId === currentUserId)) {
+    if (currentPlayerRank && currentUserId && !leaderboard.find(entry => entry.userId === currentUserId)) {
       const userData = await RedisDataAccess.getUserData(currentUserId);
       let profilePicture = userData?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
       let username = userData?.username || 'Unknown';
       
-      try {
-        const formattedUserId = currentUserId.startsWith('t2_') ? currentUserId : `t2_${currentUserId}`;
-        const user = await reddit.getUserById(formattedUserId as `t2_${string}`);
-        if (user) {
-          username = user.username;
-          profilePicture = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0YTliM2MiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyNCIgcj0iMTAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNiA1MmMwLTguODM3IDcuMTYzLTE2IDE2LTE2czE2IDcuMTYzIDE2IDE2djEySDEyVjUyWiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+';
-        }
-      } catch (error) {
-        console.log(`Could not fetch Reddit user info for current user ${currentUserId}:`, error);
-      }
+      // Do not call Reddit; use stored data only
       
       currentPlayerData = {
         username,

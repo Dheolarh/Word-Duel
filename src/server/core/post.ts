@@ -5,23 +5,31 @@ export const createPost = async () => {
   if (!subredditName) {
     throw new Error('subredditName is required');
   }
+  const splash = {
+    appDisplayName: 'Word Duel',
+    backgroundUri: 'default-splash.png',
+    buttonLabel: 'Duel ⚔',
+    entryUri: 'index.html',
+    appIconUri: 'default-icon.png',
+  };
 
-  return await reddit.submitCustomPost({
-    splash: {
-      // Splash Screen Configuration
-      appDisplayName: 'words-duel',
-      backgroundUri: 'default-splash.png',
-      buttonLabel: 'Tap to Start',
-      description: 'An exciting interactive experience',
-      entryUri: 'index.html',
-      heading: 'Welcome to the Game!',
-      appIconUri: 'default-icon.png',
-    },
-    postData: {
-      gameState: 'initial',
-      score: 0,
-    },
-    subredditName: subredditName,
-    title: 'words-duel',
-  });
+  const title = 'Word Duel - Battle of Words!';
+
+  try {
+    const post = await reddit.submitCustomPost({
+      splash,
+      postData: {
+        gameState: 'initial',
+        score: 0,
+      },
+      subredditName: subredditName,
+      title,
+    });
+
+    return post;
+  } catch (err) {
+    // Log full error to help debugging; rethrow so caller can return a 400/500 appropriately
+    console.error('Error submitting custom post:', err);
+    throw err;
+  }
 };

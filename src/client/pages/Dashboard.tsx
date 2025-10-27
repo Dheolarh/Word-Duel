@@ -9,6 +9,8 @@ import { playBackgroundMusic } from '../utils/sound';
 import { LeaderboardEntry } from '../../shared/types/game';
 import { getCurrentUserProfile } from '../utils/userProfile';
 import logo from '../assets/themes/Default/Logo.webp';
+import background from '../assets/themes/Default/Background.webp';
+import backgroundHalloween from '../assets/themes/Halloween/Background.webp';
 import leaderboardIcon from '../assets/themes/Default/LeaderboardButton.webp';
 import settingsIcon from '../assets/themes/Default/Settings.webp';
 import musicIcon from '../assets/themes/Default/Music.webp';
@@ -34,6 +36,18 @@ export function Dashboard({ onPlay }: DashboardProps) {
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { settings, toggleBackgroundMusic, toggleSoundEffects } = useAudio();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const profile = await getCurrentUserProfile();
+        if (profile && profile.username) setDisplayName(profile.username);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, []);
 
   // Auto-trigger background music immediately when dashboard loads
   useEffect(() => {
@@ -226,6 +240,10 @@ export function Dashboard({ onPlay }: DashboardProps) {
       <div className="flex flex-col items-center justify-center flex-1 gap-4 max-w-md w-full mx-auto">
         <img src={logo} alt="Word Duel" className="w-44 max-w-full" />
 
+        {displayName && (
+          <div className="text-xs text-[#2d5016] mt-2">Hello, <span className="font-semibold">{displayName}</span></div>
+        )}
+
         <div className="flex flex-col items-center gap-2">
           <SoundButton onClick={onPlay} className="w-20 h-20 hover:scale-105 transition-transform">
             <img src={playIcon} alt="Play" className="w-full h-full" />
@@ -369,7 +387,7 @@ export function Dashboard({ onPlay }: DashboardProps) {
                   }`}
                 >
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1510833077447-0ec21d50d8ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmVlbiUyMG5hdHVyZSUyMHRoZW1lfGVufDF8fHx8MTc2MDkwOTEwN3ww&ixlib=rb-4.1.0&q=80&w=1080"
+                    src={background}
                     alt="Green Theme"
                     className={`w-16 h-16 rounded-lg object-cover border-3 ${
                       selectedTheme === 'green' ? 'border-green-600' : 'border-transparent'
@@ -384,7 +402,7 @@ export function Dashboard({ onPlay }: DashboardProps) {
                   }`}
                 >
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1608590898839-de14c56b7fe5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYWxsb3dlZW4lMjBwdW1wa2luJTIwc3Bvb2t5fGVufDF8fHx8MTc2MDkwOTEwOXww&ixlib=rb-4.1.0&q=80&w=1080"
+                    src={backgroundHalloween}
                     alt="Halloween Theme"
                     className={`w-16 h-16 rounded-lg object-cover border-3 ${
                       selectedTheme === 'halloween' ? 'border-orange-600' : 'border-transparent'
