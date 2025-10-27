@@ -456,10 +456,17 @@ export class GameStateManager {
     if (gameState.mode !== 'multi') return null;
     
     const disconnectionTimeout = 5 * 60 * 1000; // 5 minutes
+    const gracePeriod = 30 * 1000; // 30 seconds grace period for new games
     const now = Date.now();
     
     // Get the opponent player
     const opponentPlayer = gameState.player1.id === activePlayerId ? gameState.player2 : gameState.player1;
+    
+    // Don't check for disconnection on brand new games (grace period)
+    const gameAge = now - gameState.startTime;
+    if (gameAge < gracePeriod) {
+      return null;
+    }
     
     // Check opponent's last activity
     const lastActivity = await redis.get(`player_activity:${gameState.gameId}:${opponentPlayer.id}`);

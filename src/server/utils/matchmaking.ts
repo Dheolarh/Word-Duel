@@ -137,8 +137,12 @@ export class MatchmakingManager {
     
     const queue: MatchmakingRequest[] = JSON.parse(queueData);
     
-    // Find the first waiting player (FIFO)
-    const waitingPlayer = queue.find(request => request.playerId !== currentRequest.playerId);
+    // Find the first waiting player (FIFO) that is NOT expired
+    const now = Date.now();
+    const waitingPlayer = queue.find(request => 
+      request.playerId !== currentRequest.playerId &&
+      (now - request.timestamp) < this.QUEUE_TIMEOUT
+    );
     
     if (waitingPlayer) {
       // Remove the matched player from queue
