@@ -40,7 +40,7 @@ function loadNamesFromDisk(): void {
     }
   }
 
-  // Fallback to build-time JSON if file not found on disk
+  // Fallback to build-time JSON if file not found on disk                                                            uu
   try {
     if (usernamesJson && typeof usernamesJson === 'object') {
       const keys = Object.keys(usernamesJson).sort((a, b) => {

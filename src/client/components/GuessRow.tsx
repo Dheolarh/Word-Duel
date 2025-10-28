@@ -12,32 +12,44 @@ export function GuessRow({ guess, feedback, wordLength, isInvalid = false }: Gue
     <div className="flex gap-0.5 justify-center">
       {letters.map((letter, index) => {
         const status = feedback?.[index];
-        let bgColor = 'bg-gradient-to-b from-[#e8f5e3] to-[#d4ead0]';
-        let borderColor = 'border-[#4a9b3c]';
-        let textColor = 'text-[#2d5016]';
+        let bgColor = '';
+        let borderColor = '';
+        let textColor = '';
 
         if (isInvalid) {
-          bgColor = 'bg-red-500';
-          borderColor = 'border-red-500';
-          textColor = 'text-white';
+          bgColor = '';
+          borderColor = '';
+          textColor = '';
         } else if (status === 'correct') {
-          bgColor = 'bg-[#6aaa64]';
-          borderColor = 'border-[#6aaa64]';
-          textColor = 'text-white';
+          bgColor = '#6aaa64';
+          borderColor = '#6aaa64';
+          textColor = '#ffffff';
         } else if (status === 'present') {
-          bgColor = 'bg-[#c9b458]';
-          borderColor = 'border-[#c9b458]';
-          textColor = 'text-white';
+          bgColor = '#c9b458';
+          borderColor = '#c9b458';
+          textColor = '#ffffff';
         } else if (status === 'absent') {
-          bgColor = 'bg-gray-400';
-          borderColor = 'border-gray-400';
-          textColor = 'text-white';
+          bgColor = '#9ca3af';
+          borderColor = '#9ca3af';
+          textColor = '#ffffff';
+        } else {
+          // default neutral tile uses theme tokens
+          bgColor = 'neutral';
+          borderColor = 'var(--border-color)';
+          textColor = 'var(--primary)';
         }
 
         return (
           <div
             key={index}
-            className={`w-9 h-9 flex items-center justify-center border-2 ${borderColor} rounded-md ${bgColor} ${textColor} uppercase transition-all duration-300 shadow-md`}
+            className={`w-9 h-9 flex items-center justify-center rounded-md uppercase transition-all duration-300 shadow-md`}
+            style={{
+              borderWidth: 2,
+              borderStyle: 'solid',
+              borderColor: borderColor,
+              background: bgColor === 'neutral' ? 'linear-gradient(to bottom, var(--bg-from), var(--bg-to))' : bgColor,
+              color: textColor,
+            }}
           >
             <span className="text-base">{letter.trim() && letter}</span>
           </div>

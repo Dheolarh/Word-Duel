@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { SoundButton } from './SoundButton';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ModalProps {
   title?: string;
@@ -10,6 +11,14 @@ interface ModalProps {
 }
 
 export function Modal({ title, headerImage, children, onClose }: ModalProps) {
+  const { festivalColors } = useTheme();
+
+  // Prefer CSS variables set by ThemeProvider; fall back to festivalColors if not present
+  const modalStyle: React.CSSProperties = {
+    backgroundColor: `var(--modal-bg, ${festivalColors.modalBg})`,
+    color: `var(--modal-text, ${festivalColors.modalText})`,
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -23,7 +32,8 @@ export function Modal({ title, headerImage, children, onClose }: ModalProps) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="relative w-full max-w-sm bg-white rounded-xl shadow-xl max-h-[85vh] overflow-hidden flex flex-col"
+        className="relative w-full max-w-sm rounded-xl shadow-xl max-h-[85vh] overflow-hidden flex flex-col"
+  style={modalStyle as any}
       >
         {headerImage ? (
           <div className="relative flex items-center justify-center pt-3 pb-2">
@@ -32,7 +42,7 @@ export function Modal({ title, headerImage, children, onClose }: ModalProps) {
               onClick={onClose}
               className="absolute right-2 top-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" style={{ color: modalStyle.color }} />
             </SoundButton>
           </div>
         ) : (
@@ -42,7 +52,7 @@ export function Modal({ title, headerImage, children, onClose }: ModalProps) {
               onClick={onClose}
               className="ml-auto p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" style={{ color: modalStyle.color }} />
             </SoundButton>
           </div>
         )}

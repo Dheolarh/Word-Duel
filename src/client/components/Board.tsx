@@ -66,7 +66,7 @@ export function Board({ guesses, currentGuess, wordLength, maxGuesses = 6, diffi
       }`}
       style={{
         scrollbarWidth: 'thin',
-        scrollbarColor: '#4a9b3c #e5e7eb'
+        scrollbarColor: 'var(--border-color) #e5e7eb'
       }}
     >
       {visibleRows.map((guess, index) => {

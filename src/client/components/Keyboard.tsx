@@ -15,12 +15,12 @@ const KEYBOARD_ROWS = [
 ];
 
 export function Keyboard({ onKeyPress, onEnter, onDelete, keyFeedback }: KeyboardProps) {
-  const getKeyColor = (key: string) => {
+  const getKeyStyle = (key: string) => {
     const status = keyFeedback?.get(key);
-    if (status === 'correct') return 'bg-[#6aaa64] text-white border-[#6aaa64]';
-    if (status === 'present') return 'bg-[#c9b458] text-white border-[#c9b458]';
-    if (status === 'absent') return 'bg-gray-400 text-white border-gray-400';
-    return 'bg-white text-[#2d5016] border-[#4a9b3c] hover:bg-[#f0f7ee]';
+    if (status === 'correct') return { backgroundColor: '#6aaa64', color: '#ffffff', borderColor: '#6aaa64' };
+    if (status === 'present') return { backgroundColor: '#c9b458', color: '#ffffff', borderColor: '#c9b458' };
+    if (status === 'absent') return { backgroundColor: '#9ca3af', color: '#ffffff', borderColor: '#9ca3af' };
+    return { backgroundColor: 'white', color: 'var(--primary)', borderColor: 'var(--border-color)' };
   };
 
   const handleKeyClick = (key: string) => {
@@ -34,7 +34,7 @@ export function Keyboard({ onKeyPress, onEnter, onDelete, keyFeedback }: Keyboar
   };
 
   return (
-    <div className="w-fit mx-auto bg-white/95 rounded-lg shadow-2xl p-1.5 border-2 border-[#4a9b3c]/30">
+      <div className="w-fit mx-auto bg-white/95 rounded-lg shadow-2xl p-1.5 border-2" style={{ borderColor: 'var(--border-color)' }}>
       <div className="space-y-0.5">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-0.5 justify-center">
@@ -42,7 +42,8 @@ export function Keyboard({ onKeyPress, onEnter, onDelete, keyFeedback }: Keyboar
               <SoundButton
                 key={key}
                 onClick={() => handleKeyClick(key)}
-                className={`w-6 h-8 rounded border-2 transition-all active:scale-95 flex items-center justify-center shadow-md ${getKeyColor(key)}`}
+                className={`w-6 h-8 rounded border-2 transition-all active:scale-95 flex items-center justify-center shadow-md`}
+                style={getKeyStyle(key)}
               >
                 <span className="text-xs">{key}</span>
               </SoundButton>
@@ -54,14 +55,16 @@ export function Keyboard({ onKeyPress, onEnter, onDelete, keyFeedback }: Keyboar
         <div className="flex gap-0.5 justify-center mt-0.5">
           <SoundButton
             onClick={onDelete}
-            className="px-1.5 h-8 rounded border-2 border-[#4a9b3c] bg-white text-[#2d5016] hover:bg-[#f0f7ee] transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+            className="px-1.5 h-8 rounded border-2 bg-white transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--primary)' }}
           >
             <Delete className="w-3 h-3" />
             <span className="text-xs">Delete</span>
           </SoundButton>
           <SoundButton
             onClick={onEnter}
-            className="px-2 h-8 rounded border-2 border-[#4a9b3c] bg-[#4a9b3c] text-white hover:bg-[#3d8432] transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+            className="px-2 h-8 rounded border-2 text-white hover:opacity-95 transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+            style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}
           >
             <CornerDownLeft className="w-3 h-3" />
             <span className="text-xs">Enter</span>

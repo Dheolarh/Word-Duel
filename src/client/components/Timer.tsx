@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Clock } from 'lucide-react';
 
 interface TimerProps {
   initialTime: number; // in seconds
@@ -32,7 +31,7 @@ export function Timer({ initialTime, onTimeUp, isPaused = false }: TimerProps) {
 
   return (
     <div className="flex items-center gap-1">
-      <span className="text-xs tabular-nums">
+      <span className="text-xs tabular-nums" style={{ color: 'var(--on-primary)' }}>
         {minutes}:{seconds.toString().padStart(2, '0')}
       </span>
     </div>

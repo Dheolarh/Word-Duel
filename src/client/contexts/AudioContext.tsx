@@ -41,7 +41,18 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   // Handle background music based on settings
   useEffect(() => {
     if (settings.backgroundMusicEnabled) {
-      playBackgroundMusic().catch(console.log);
+      try {
+        // Determine current theme so we can play the matching variant.
+        // Prefer persisted theme in localStorage, fallback to document dataset.
+        const savedTheme = localStorage.getItem('wordDuelTheme');
+        const docTheme = typeof document !== 'undefined' ? document.documentElement.dataset.theme : undefined;
+        const themeName = savedTheme || docTheme || 'green';
+        const variant = themeName === 'Festive' || themeName === 'festive' ? 'festive' : 'default';
+        playBackgroundMusic(variant).catch(console.log);
+      } catch (e) {
+        // fallback to default variant if anything fails
+        playBackgroundMusic('default').catch(console.log);
+      }
     } else {
       stopBackgroundMusic();
     }

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SoundButton } from '../components/SoundButton';
 import { playClickSound } from '../utils/sound';
-import singlePlayerBtn from '../assets/themes/Default/Singleplayer.webp';
-import multiplayerBtn from '../assets/themes/Default/Multiplayer.webp';
-import backBtn from '../assets/themes/Default/Back.webp';
+import { useTheme } from '../contexts/ThemeContext';
 import { Delete } from 'lucide-react';
 import { ValidationResponse } from '../../shared/types/api';
 
@@ -229,11 +227,15 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
       <div
         key={index}
         onClick={() => handleGridClick(gridSize)}
-        className={`w-10 h-10 rounded-md border-3 border-[#4a9b3c] bg-gradient-to-b from-[#e8f5e3] to-[#d4ead0] flex items-center justify-center shadow-md cursor-pointer transition-all ${
-          isInactive ? 'opacity-30 grayscale' : ''
-        }`}
+        className={`w-10 h-10 rounded-md border-3 flex items-center justify-center shadow-md cursor-pointer transition-all`}
+        style={{
+          borderColor: 'var(--border-color)',
+          backgroundImage: 'linear-gradient(to bottom, var(--bg-from), var(--bg-to))',
+          opacity: isInactive ? 0.35 : 1,
+          filter: isInactive ? 'grayscale(100%)' : undefined,
+        }}
       >
-        <span className="text-lg text-[#2d5016]">{letter}</span>
+        <span className="text-lg" style={{ color: 'var(--primary)' }}>{letter}</span>
       </div>
     );
   };
@@ -248,6 +250,8 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
   ];
 
+  const { assets } = useTheme();
+
   return (
     <div className="w-full h-screen flex flex-col items-center justify-between p-2 relative overflow-hidden">
       {/* Back button */}
@@ -255,19 +259,19 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
         onClick={onBack}
         className="absolute top-2 left-2 hover:scale-110 transition-transform z-10"
       >
-        <img src={backBtn} alt="Back" className="w-8 h-8" />
+        <img src={assets.back} alt="Back" className="w-8 h-8" />
       </SoundButton>
 
       {/* Top section with grids and buttons */}
       <div className="flex flex-col items-center justify-center gap-2 flex-1 w-full max-w-md pt-8">
         {/* Enter Words Text */}
-        <h2 className="text-xl text-[#e0f2d0] mb-1">
+        <h2 className="text-xl text-[var(--primary)] mb-1">
           Enter Words
         </h2>
 
         {/* 4-Letter Word Grid */}
         <div className="flex flex-col items-center gap-1">
-          <span className="text-sm text-[#e0f2d0]">
+          <span className="text-sm text-[var(--muted)]">
             4 Letters
           </span>
           <div className="flex gap-1">{[...Array(4)].map((_, i) => renderTile(i, 4))}</div>
@@ -275,7 +279,7 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
 
         {/* 5-Letter Word Grid */}
         <div className="flex flex-col items-center gap-1">
-          <span className="text-sm text-[#e0f2d0]">
+          <span className="text-sm text-[var(--muted)]">
             5 Letters
           </span>
           <div className="flex gap-1">{[...Array(5)].map((_, i) => renderTile(i, 5))}</div>
@@ -286,7 +290,7 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
           {isWordComplete && (
             <>
               {validationState.isValidating && (
-                <span className="text-sm text-[#e0f2d0]">
+                <span className="text-sm text-[var(--muted)]">
                   validating word...
                 </span>
               )}
@@ -306,14 +310,14 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
 
         {/* Game Mode Buttons */}
         <div className="flex flex-col gap-2 items-center mt-2">
-          <SoundButton
+                  <SoundButton
             onClick={() => handleProceed('single')}
             disabled={!canProceed}
             className={`hover:scale-105 transition-transform ${
               !canProceed ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            <img src={singlePlayerBtn} alt="Single Player" className="h-14" />
+            <img src={assets.singleplayer} alt="Single Player" className="h-14" />
           </SoundButton>
           <SoundButton
             onClick={() => handleProceed('multi')}
@@ -322,14 +326,14 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
               !canProceed ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            <img src={multiplayerBtn} alt="Multiplayer" className="h-14" />
+            <img src={assets.multiplayer} alt="Multiplayer" className="h-14" />
           </SoundButton>
         </div>
       </div>
 
       {/* On-screen Keyboard */}
       <div className="w-full pb-2 flex justify-center">
-        <div className="w-fit bg-white/95 rounded-lg shadow-2xl p-1.5 border-2 border-[#4a9b3c]/30">
+        <div className="w-fit bg-white/95 rounded-lg shadow-2xl p-1.5 border-2" style={{ borderColor: 'var(--border-color)' }}>
           <div className="space-y-0.5">
             {KEYBOARD_ROWS.map((row, rowIndex) => (
               <div key={rowIndex} className="flex gap-0.5 justify-center">
@@ -337,7 +341,8 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
                   <SoundButton
                     key={key}
                     onClick={() => handleKeyPress(key)}
-                    className="w-6 h-8 rounded border-2 bg-white text-[#2d5016] border-[#4a9b3c] hover:bg-[#f0f7ee] transition-all active:scale-95 flex items-center justify-center shadow-md"
+                    className="w-6 h-8 rounded border-2 bg-white transition-all active:scale-95 flex items-center justify-center shadow-md"
+                    style={{ color: 'var(--primary)', borderColor: 'var(--border-color)' }}
                   >
                     <span className="text-xs">{key}</span>
                   </SoundButton>
@@ -349,7 +354,8 @@ export function PreGame({ onSinglePlayer, onMultiplayer, onBack }: PreGameProps)
             <div className="flex gap-0.5 justify-center mt-0.5">
               <SoundButton
                 onClick={handleDelete}
-                className="px-1.5 h-8 rounded border-2 border-[#4a9b3c] bg-white text-[#2d5016] hover:bg-[#f0f7ee] transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+                className="px-1.5 h-8 rounded border-2 bg-white transition-all active:scale-95 flex items-center gap-0.5 shadow-md"
+                style={{ borderColor: 'var(--border-color)', color: 'var(--primary)' }}
               >
                 <Delete className="w-3 h-3" />
                 <span className="text-xs">Delete</span>

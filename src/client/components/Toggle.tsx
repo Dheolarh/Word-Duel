@@ -4,6 +4,8 @@ interface ToggleProps {
   enabled: boolean;
   onToggle: () => void;
   label: string;
+  /** Optional color override for the label text (CSS color string) */
+  labelColor: string | undefined;
 }
 
 const StyledWrapper = styled.div`
@@ -71,10 +73,10 @@ const StyledWrapper = styled.div`
   }
 `;
 
-export function Toggle({ enabled, onToggle, label }: ToggleProps) {
+export function Toggle({ enabled, onToggle, label, labelColor }: ToggleProps) {
   return (
     <div className="flex items-center justify-between w-full py-3">
-      <span className="text-sm text-[#2d5016] font-medium">{label}</span>
+      <span className="text-sm font-medium" style={{ color: labelColor ?? 'var(--primary)' }}>{label}</span>
       
       <StyledWrapper>
         <div className="checkbox-apple">

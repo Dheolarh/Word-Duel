@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { SoundButton } from '../components/SoundButton';
-import backBtn from '../assets/themes/Default/Back.webp';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SearchingProps {
   playerId: string;
@@ -18,8 +18,9 @@ interface MatchmakingStatus {
 }
 
 export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeout }: SearchingProps) {
-  const [status, setStatus] = useState<MatchmakingStatus>({ inQueue: true, playersWaiting: 0, averageWaitTime: 0 });
-  const [timeWaiting, setTimeWaiting] = useState(0);
+  const { assets, theme } = useTheme();
+  // Status kept only to track queue presence on the server when needed
+  const [, setStatus] = useState<MatchmakingStatus>({ inQueue: true, playersWaiting: 0, averageWaitTime: 0 });
   const [hasTimedOut, setHasTimedOut] = useState(false);
 
   // Polling interval for checking matchmaking status
@@ -52,7 +53,7 @@ export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeou
       
       if (data.success) {
         setStatus(data.data);
-        
+
         // If player is no longer in queue, they might have been matched
         if (!data.data.inQueue) {
           // Double-check for active game
@@ -107,19 +108,12 @@ export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeou
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
     let timeoutTimer: NodeJS.Timeout;
-    let waitingTimer: NodeJS.Timeout;
 
     // Start polling for matchmaking status
     pollInterval = setInterval(checkMatchmakingStatus, POLL_INTERVAL);
-    
+
     // Set up timeout
     timeoutTimer = setTimeout(handleTimeout, TIMEOUT_DURATION);
-    
-    // Update waiting time counter
-    const startTime = Date.now();
-    waitingTimer = setInterval(() => {
-      setTimeWaiting(Date.now() - startTime);
-    }, 1000);
 
     // Initial status check
     checkMatchmakingStatus();
@@ -127,7 +121,6 @@ export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeou
     return () => {
       clearInterval(pollInterval);
       clearTimeout(timeoutTimer);
-      clearInterval(waitingTimer);
     };
   }, [checkMatchmakingStatus, handleTimeout]);
 
@@ -140,16 +133,11 @@ export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeou
     };
   }, [leaveQueue, hasTimedOut]);
 
-  const formatTime = (ms: number): string => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    return `${remainingSeconds}s`;
-  };
+  // formatTime removed — no longer displaying timers in searching UI
+
+  // Only render the minimal searching UI per request: back button + single searching header
+  // Use app-wide text color for Festive (purple), default keep primary for emphasis
+  const headerColor = theme === 'Festive' ? 'var(--app-text)' : 'var(--primary)';
 
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center p-2 relative gap-4 overflow-hidden">
@@ -158,78 +146,31 @@ export function Searching({ playerId, wordLength, onMatchFound, onBack, onTimeou
         onClick={handleBack}
         className="absolute top-2 left-2 hover:scale-110 transition-transform z-10"
       >
-        <img src={backBtn} alt="Back" className="w-8 h-8" />
+        <img src={assets.back} alt="Back" className="w-8 h-8" />
       </SoundButton>
 
-      {/* Searching Text */}
+      {/* Searching Text - theme aware, no shadow */}
       <h1
-        className="text-2xl text-[#c8e6a0] px-2 text-center"
+        className="text-2xl px-2 text-center"
         style={{
-          textShadow:
-            '4px 4px 0 #2d5016, -2px -2px 0 #2d5016, 2px -2px 0 #2d5016, -2px 2px 0 #2d5016, 2px 2px 0 #2d5016',
+          color: headerColor,
+          textShadow: 'none'
         }}
       >
         Searching for Player
       </h1>
-
-      {/* Game Mode Info */}
-      <div className="text-center mb-4">
-        <p className="text-[#c8e6a0] text-lg font-semibold">
-          {wordLength}-Letter Words
-        </p>
-        <p className="text-[#8bc34a] text-sm">
-          Multiplayer Mode
-        </p>
-      </div>
-
-      {/* Matchmaking Status */}
-      <div className="bg-[#2d5016] rounded-lg p-4 mb-6 border-2 border-[#4a9b3c] max-w-sm w-full">
-        <div className="text-center space-y-2">
-          <p className="text-[#c8e6a0] text-sm">
-            Time Waiting: <span className="font-mono">{formatTime(timeWaiting)}</span>
-          </p>
-          <p className="text-[#8bc34a] text-sm">
-            Players in Queue: {status.playersWaiting}
-          </p>
-          {status.averageWaitTime > 0 && (
-            <p className="text-[#8bc34a] text-xs">
-              Avg. Wait: {formatTime(status.averageWaitTime)}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Animated Dots */}
-      <div className="flex gap-3 mt-6">
+      {/* animated dots */}
+      <div className="flex gap-3 mt-4">
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
-            className="w-6 h-6 rounded-full bg-[#4a9b3c] border-3 border-[#2d5016]"
-            animate={{
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              delay: i * 0.2,
-              ease: 'easeInOut',
-            }}
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: headerColor }}
+            animate={{ y: [0, -12, 0] }}
+            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
           />
         ))}
       </div>
-
-      {/* Timeout Warning */}
-      {timeWaiting > 45000 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 text-center"
-        >
-          <p className="text-yellow-400 text-sm">
-            Search will timeout in {Math.ceil((TIMEOUT_DURATION - timeWaiting) / 1000)}s
-          </p>
-        </motion.div>
-      )}
     </div>
   );
 }

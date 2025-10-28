@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playBackgroundMusic } from './utils/sound';
 import { AudioProvider } from './contexts/AudioContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { ErrorModal } from './components/ErrorModal';
 import { Splash } from './pages/Splash';
 import { Dashboard } from './pages/Dashboard';
@@ -9,7 +10,7 @@ import { PreGame } from './pages/PreGame';
 import { SelectDifficulty } from './pages/SelectDifficulty';
 import { Searching } from './pages/Searching';
 import { Game } from './pages/Game';
-import background from './assets/themes/Default/Background.webp';
+// background moved to ThemeContext assets
 import { ApiResponse } from '../shared/types/api';
 import { getCurrentUserProfile } from './utils/userProfile';
 import { GameState } from '../shared/types/game';
@@ -49,7 +50,22 @@ export const App = () => {
     if (currentPage === 'dashboard') {
       // Small delay to ensure smooth transition
       setTimeout(() => {
-        playBackgroundMusic();
+        try {
+          // Respect saved audio setting and saved theme so returning to dashboard doesn't force default music
+          const audioSettingsRaw = localStorage.getItem('wordDuelAudioSettings');
+          const audioSettings = audioSettingsRaw ? JSON.parse(audioSettingsRaw) : { backgroundMusicEnabled: true };
+          if (!audioSettings.backgroundMusicEnabled) return;
+
+          const savedTheme = localStorage.getItem('wordDuelTheme');
+          const variant = savedTheme === 'Festive' ? 'festive' : 'default';
+          // Play the appropriate variant
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          playBackgroundMusic(variant as 'default' | 'festive');
+        } catch (e) {
+          // Fallback to default play
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          playBackgroundMusic();
+        }
       }, 100);
     }
   }, [currentPage]);
@@ -166,7 +182,7 @@ export const App = () => {
     
     try {
       // Fetch the game state for the matched game
-      const response = await fetch(`/api/get-game-state/${gameId}?playerId=${encodeURIComponent(userProfile?.userId || 'current-user')}`);
+  const response = await fetch(`/api/get-game-state/${gameId}?playerId=${encodeURIComponent(userProfile?.userId || sessionId)}`);
       const data: ApiResponse<{ gameState: GameState }> = await response.json();
       
       if (data.success && data.data) {
@@ -209,14 +225,24 @@ export const App = () => {
     transition: { duration: 0.3 },
   };
 
+  const BackgroundLayer: React.FC = () => {
+    // This component is rendered inside ThemeProvider so it can consume theme assets
+    const { assets } = useTheme();
+    return (
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${assets.background})` }}
+      />
+    );
+  };
+
   return (
-    <AudioProvider>
+    <ThemeProvider>
+      <AudioProvider>
       <div className="w-full h-screen overflow-hidden">
         {/* Fixed background that doesn't participate in transitions */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${background})` }}
-        />
+        {/* Render background via ThemeContext so theme images can swap at runtime */}
+        <BackgroundLayer />
 
         {/* Content that transitions */}
         <div className="relative z-10 w-full h-full">
@@ -300,6 +326,7 @@ export const App = () => {
           />
         )}
       </div>
-    </AudioProvider>
+      </AudioProvider>
+    </ThemeProvider>
   );
 };

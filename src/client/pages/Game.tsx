@@ -15,9 +15,7 @@ import { GameState, PlayerState, ScoreBreakdown } from '../../shared/types/game'
 import { ApiResponse, SubmitGuessResponse, GetGameStateResponse } from '../../shared/types/api';
 import { getCurrentUserProfile, getProfilePictureUrl, getAIProfilePicture, UserProfile } from '../utils/userProfile';
 import { ErrorHandler, ErrorInfo } from '../utils/errorHandling';
-import pauseBtn from '../assets/themes/Default/Pause.webp';
-import quitBtn from '../assets/themes/Default/Quit.webp';
-import backBtn from '../assets/themes/Default/Back.webp';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface GameProps {
   gameId: string;
@@ -56,6 +54,8 @@ export function Game({
   const gameStatePollingRef = useRef<NodeJS.Timeout | null>(null);
   const syncValidationRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { assets, theme, allTokens } = useTheme();
+
   // Fetch user profile on component mount
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -75,18 +75,14 @@ export function Game({
   let opponentPlayer: PlayerState;
   
   if (isMultiplayer) {
-    // For multiplayer, determine based on the playerId prop (already resolved correctly)
-    if (gameState?.player1.id === playerId) {
+    // For multiplayer, determine based on actual user ID or the playerId prop (session id for anonymous)
+    const currentUserId = userProfile?.userId || playerId;
+    if (gameState?.player1.id === currentUserId) {
       currentPlayer = gameState.player1;
       opponentPlayer = gameState.player2;
-    } else if (gameState?.player2.id === playerId) {
-      currentPlayer = gameState.player2;
-      opponentPlayer = gameState.player1;
     } else {
-      // Fallback: couldn't match playerId, default to player1
-      console.warn('Player ID mismatch in multiplayer game. playerId:', playerId, 'player1.id:', gameState?.player1.id, 'player2.id:', gameState?.player2.id);
-      currentPlayer = gameState?.player1 || gameState?.player2!;
-      opponentPlayer = gameState?.player2 || gameState?.player1!;
+      currentPlayer = gameState?.player2 || gameState?.player1;
+      opponentPlayer = gameState?.player1 || gameState?.player2;
     }
   } else {
     // For single player, determine based on who is AI
@@ -164,8 +160,11 @@ export function Game({
   // Submit guess to API
   const submitGuess = async (guess: string): Promise<boolean> => {
     setIsSubmittingGuess(true);
-    
+
     try {
+  // Use the playerId prop for multiplayer games (this is sessionId for anonymous users)
+  const playerIdToUse = isMultiplayer ? playerId : 'current-user';
+      
       const response = await fetch('/api/submit-guess', {
         method: 'POST',
         headers: {
@@ -173,7 +172,7 @@ export function Game({
         },
         body: JSON.stringify({
           gameId,
-          playerId,
+          playerId: playerIdToUse,
           guess,
         }),
       });
@@ -303,13 +302,16 @@ export function Game({
     if (!isMultiplayer || gameStatus !== 'playing') return;
     
     try {
+      // Use playerId prop for multiplayer actions
+      const playerIdToUse = playerId;
+      
       const response = await fetch(`/api/skip-turn/${gameId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          playerId,
+          playerId: playerIdToUse,
         }),
       });
 
@@ -562,7 +564,7 @@ export function Game({
       <div className="w-full max-w-md flex justify-between items-center px-2 pt-1.5 pb-1">
         {/* Left player */}
         <div className="flex items-center gap-1.5">
-          <div className="w-8 h-8 rounded-full border-2 border-[#4a9b3c] overflow-hidden bg-white shadow-lg">
+          <div className="w-8 h-8 rounded-full border-2 overflow-hidden bg-white shadow-lg" style={{ borderColor: 'var(--border-color)' }}>
             <ImageWithFallback
               src={playerProfilePicture}
               alt={playerName}
@@ -579,7 +581,7 @@ export function Game({
 
         {/* Center timer */}
         <div className="flex flex-col items-center gap-1">
-          <div className="bg-[#2d5016] text-white px-2 py-1 rounded-full shadow-lg">
+          <div className="px-2 py-1 rounded-full shadow-lg" style={{ backgroundColor: 'var(--primary)', color: 'var(--on-primary)' }}>
             <Timer
               initialTime={Math.max(
                 0,
@@ -609,7 +611,7 @@ export function Game({
           >
             {opponentName}
           </span>
-          <div className={`w-8 h-8 rounded-full border-2 ${opponentPlayer?.isAI ? 'border-orange-500' : 'border-[#3b82c6]'} overflow-hidden bg-white shadow-lg`}>
+          <div className={`w-8 h-8 rounded-full border-2 overflow-hidden bg-white shadow-lg`} style={{ borderColor: opponentPlayer?.isAI ? '#f59e0b' : 'var(--border-color)' }}>
             <ImageWithFallback
               src={opponentProfilePicture}
               alt={opponentName}
@@ -632,18 +634,14 @@ export function Game({
           onClick={() => setIsPaused(!isPaused)}
           className="hover:scale-110 transition-transform"
         >
-          <img src={pauseBtn} alt="Pause" className="w-8 h-8" />
+          <img src={assets.pause} alt="Pause" className="w-8 h-8" />
         </SoundButton>
       </div>
 
       {/* Game boards container - flex-1 ensures it takes remaining space */}
       <div className="flex-1 flex flex-col items-center justify-center gap-1.5 w-full px-2 min-h-0">
         {/* Opponent's board */}
-        <div className={`bg-gradient-to-br rounded-lg shadow-xl p-1.5 border-2 w-fit mx-auto ${
-          opponentPlayer?.isAI 
-            ? 'from-orange-100/90 to-orange-50/70 border-orange-500/40' 
-            : 'from-blue-100/90 to-blue-50/70 border-[#3b82c6]/40'
-        }`}>
+        <div style={{ borderRadius: 8, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: 6, borderWidth: 2, display: 'inline-block', margin: '0 auto', backgroundImage: theme === 'Festive' ? 'linear-gradient(to bottom right, rgba(75,0,130,0.92), rgba(60,0,104,0.85))' : 'linear-gradient(to bottom right, rgba(219,234,254,0.9), rgba(191,219,254,0.7))', borderColor: theme === 'Festive' ? (allTokens.Festive?.primary ?? '#4B0082') : '#1e40af' }}>
           <EnemyGuessRow 
             guess={enemyGuess} 
             wordLength={wordLength}
@@ -652,7 +650,7 @@ export function Game({
         </div>
 
         {/* Player's board */}
-        <div className="bg-gradient-to-br from-white/90 to-white/70 rounded-lg shadow-xl p-1.5 border-2 border-[#4a9b3c]/40 w-fit mx-auto">
+        <div className="rounded-lg shadow-xl p-1.5 border-2 w-fit mx-auto" style={{ backgroundImage: 'linear-gradient(to bottom right, rgba(255,255,255,0.9), rgba(255,255,255,0.7))', borderColor: 'var(--border-color)' }}>
           <Board
             guesses={guesses}
             currentGuess={showInvalidWord ? invalidWord : currentGuess}
@@ -683,12 +681,12 @@ export function Game({
               onClick={() => setIsPaused(false)}
               className="absolute top-2 right-2 hover:scale-110 transition-transform"
             >
-              <img src={backBtn} alt="Back" className="w-8 h-8" />
+              <img src={assets.back} alt="Back" className="w-8 h-8" />
             </SoundButton>
 
             {/* Quit button */}
             <SoundButton onClick={onExit} className="hover:scale-105 transition-transform">
-              <img src={quitBtn} alt="Quit" className="w-40" />
+              <img src={assets.quit} alt="Quit" className="w-40" />
             </SoundButton>
           </div>
         )}

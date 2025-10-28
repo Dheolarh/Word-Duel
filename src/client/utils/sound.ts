@@ -1,6 +1,6 @@
 // Import sound assets
 import backgroundSound from '../assets/sounds/background.mp3';
-import backgroundHalloweenSound from '../assets/sounds/backgroundHalloween.mp3';
+import backgroundFestiveSound from '../assets/sounds/backgroundHalloween.mp3';
 import clickSound from '../assets/sounds/click.mp3';
 import loseSound from '../assets/sounds/lose.mp3';
 import tieSound from '../assets/sounds/tie.mp3';
@@ -18,7 +18,7 @@ export const sounds = {
   lose: loseSound,
   tie: tieSound,
   background: backgroundSound,
-  backgroundHalloween: backgroundHalloweenSound,
+  backgroundFestive: backgroundFestiveSound,
 };
 
 // Create a pool of click sounds for instant playback
@@ -157,34 +157,44 @@ export const enableAudio = async () => {
   }
 };
 
-export const playBackgroundMusic = async () => {
+export const playBackgroundMusic = async (variant: 'default' | 'festive' = 'default') => {
   try {
+    const src = variant === 'festive' ? sounds.backgroundFestive : sounds.background;
+
+    // If there's existing music and it's different, stop it so we can switch
+    if (backgroundMusic && backgroundMusic.src && !backgroundMusic.src.includes(src)) {
+      try {
+        backgroundMusic.pause();
+      } catch (e) {
+        // ignore
+      }
+      backgroundMusic = null;
+    }
+
     if (!backgroundMusic) {
-      backgroundMusic = new Audio(sounds.background);
+      backgroundMusic = new Audio(src);
       backgroundMusic.loop = true;
-      backgroundMusic.volume = 0.25; // Lower volume for background (reduced from 0.3)
+      backgroundMusic.volume = 0.25; // Lower volume for background
       backgroundMusic.preload = 'auto';
-      
-      // Ensure the audio is ready to play
       backgroundMusic.load();
     }
-    
+
     // Force enable audio if not already enabled
     if (!audioEnabled) {
       audioEnabled = true;
     }
-    
+
     // Try to play if not already playing
     if (backgroundMusic.paused) {
       backgroundMusic.currentTime = 0;
       const playPromise = backgroundMusic.play();
       if (playPromise !== undefined) {
         await playPromise;
-        console.log('Background music started successfully');
+        // console.log('Background music started successfully');
       }
     }
   } catch (error) {
-    console.log('Background music play failed:', error);
+    // console.log('Background music play failed:', error);
     throw error; // Re-throw to handle in enableAudio
   }
 };

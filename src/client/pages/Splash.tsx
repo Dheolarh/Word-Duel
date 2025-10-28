@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { enableAudio } from '../utils/sound';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Import all Default theme images
 import logo from '../assets/themes/Default/Logo.webp';
@@ -22,29 +23,29 @@ import themesImg from '../assets/themes/Default/Themes.webp';
 import tieImg from '../assets/themes/Default/Tie.webp';
 import winImg from '../assets/themes/Default/Win.webp';
 
-// Import all Halloween theme images
-import logoHalloween from '../assets/themes/Halloween/Logo.webp';
-import backgroundHalloween from '../assets/themes/Halloween/Background.webp';
-import backImgHalloween from '../assets/themes/Halloween/Back.webp';
-import easyImgHalloween from '../assets/themes/Halloween/Easy.webp';
-import hardImgHalloween from '../assets/themes/Halloween/Hard.webp';
-import leaderboardImgHalloween from '../assets/themes/Halloween/Leaderboard.webp';
-import leaderboardButtonImgHalloween from '../assets/themes/Halloween/LeaderboardButton.webp';
-import loseImgHalloween from '../assets/themes/Halloween/Lose.webp';
-import mediumImgHalloween from '../assets/themes/Halloween/Medium.webp';
-import multiplayerImgHalloween from '../assets/themes/Halloween/Multiplayer.webp';
-import pauseImgHalloween from '../assets/themes/Halloween/Pause.webp';
-import playButtonImgHalloween from '../assets/themes/Halloween/PlayButton.webp';
-import quitImgHalloween from '../assets/themes/Halloween/Quit.webp';
-import settingsImgHalloween from '../assets/themes/Halloween/Settings.webp';
-import singleplayerImgHalloween from '../assets/themes/Halloween/Singleplayer.webp';
-import themesImgHalloween from '../assets/themes/Halloween/Themes.webp';
-import tieImgHalloween from '../assets/themes/Halloween/Tie.webp';
-import winImgHalloween from '../assets/themes/Halloween/Win.webp';
+// Import all Festive theme images
+import logoFestive from '../assets/themes/Festive/Logo.webp';
+import backgroundFestive from '../assets/themes/Festive/Background.webp';
+import backImgFestive from '../assets/themes/Festive/Back.webp';
+import easyImgFestive from '../assets/themes/Festive/Easy.webp';
+import hardImgFestive from '../assets/themes/Festive/Hard.webp';
+import leaderboardImgFestive from '../assets/themes/Festive/Leaderboard.webp';
+import leaderboardButtonImgFestive from '../assets/themes/Festive/LeaderboardButton.webp';
+import loseImgFestive from '../assets/themes/Festive/Lose.webp';
+import mediumImgFestive from '../assets/themes/Festive/Medium.webp';
+import multiplayerImgFestive from '../assets/themes/Festive/Multiplayer.webp';
+import pauseImgFestive from '../assets/themes/Festive/Pause.webp';
+import playButtonImgFestive from '../assets/themes/Festive/PlayButton.webp';
+import quitImgFestive from '../assets/themes/Festive/Quit.webp';
+import settingsImgFestive from '../assets/themes/Festive/Settings.webp';
+import singleplayerImgFestive from '../assets/themes/Festive/Singleplayer.webp';
+import themesImgFestive from '../assets/themes/Festive/Themes.webp';
+import tieImgFestive from '../assets/themes/Festive/Tie.webp';
+import winImgFestive from '../assets/themes/Festive/Win.webp';
 
 // Import sound assets
 import backgroundSound from '../assets/sounds/background.mp3';
-import backgroundHalloweenSound from '../assets/sounds/backgroundHalloween.mp3';
+import backgroundFestiveSound from '../assets/sounds/backgroundHalloween.mp3';
 import clickSound from '../assets/sounds/click.mp3';
 import loseSound from '../assets/sounds/lose.mp3';
 import tieSound from '../assets/sounds/tie.mp3';
@@ -90,31 +91,31 @@ export function Splash({ onComplete }: SplashProps) {
         themesImg,
         tieImg,
         winImg,
-        // Halloween theme
-        logoHalloween,
-        backgroundHalloween,
-        backImgHalloween,
-        easyImgHalloween,
-        hardImgHalloween,
-        leaderboardImgHalloween,
-        leaderboardButtonImgHalloween,
-        loseImgHalloween,
-        mediumImgHalloween,
-        multiplayerImgHalloween,
-        pauseImgHalloween,
-        playButtonImgHalloween,
-        quitImgHalloween,
-        settingsImgHalloween,
-        singleplayerImgHalloween,
-        themesImgHalloween,
-        tieImgHalloween,
-        winImgHalloween,
+        // Festive theme
+        logoFestive,
+        backgroundFestive,
+        backImgFestive,
+        easyImgFestive,
+        hardImgFestive,
+        leaderboardImgFestive,
+        leaderboardButtonImgFestive,
+        loseImgFestive,
+        mediumImgFestive,
+        multiplayerImgFestive,
+        pauseImgFestive,
+        playButtonImgFestive,
+        quitImgFestive,
+        settingsImgFestive,
+        singleplayerImgFestive,
+        themesImgFestive,
+        tieImgFestive,
+        winImgFestive,
       ];
 
       // All sound assets
       const soundAssets = [
         backgroundSound,
-        backgroundHalloweenSound,
+        backgroundFestiveSound,
         clickSound,
         loseSound,
         tieSound,
@@ -275,11 +276,13 @@ export function Splash({ onComplete }: SplashProps) {
     preloadAssets();
   }, [onComplete]);
 
+  const { assets } = useTheme();
+
   return (
-    <div className="w-full h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="w-full h-screen flex items-center justify-center overflow-hidden" style={{ backgroundImage: `url(${assets.background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="flex flex-col items-center gap-6 p-8">
         <div className="animate-bounce px-2">
-          <img src={logo} alt="Word Duel" className="w-48 max-w-full drop-shadow-2xl" />
+          <img src={assets.logo} alt="Word Duel" className="w-48 max-w-full drop-shadow-2xl" />
         </div>
 
         {isLoading && (
@@ -304,11 +307,11 @@ export function Splash({ onComplete }: SplashProps) {
 
         {!isLoading && (
           <div className="flex flex-col items-center gap-2 animate-fade-in">
-            <div className="w-64 bg-green-500/20 rounded-full h-3 overflow-hidden backdrop-blur-sm">
-              <div className="h-full bg-gradient-to-r from-green-400 to-emerald-400 rounded-full w-full" />
+            <div className="w-64 rounded-full h-3 overflow-hidden backdrop-blur-sm" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+              <div className="h-full rounded-full w-full" style={{ backgroundImage: 'linear-gradient(to right, var(--bg-from), var(--bg-to))' }} />
             </div>
-            <p className="text-green-300 text-lg font-bold">Ready to Play!</p>
-            <p className="text-white/60 text-xs">Transitioning to game...</p>
+            <p className="text-[var(--primary)] text-lg font-bold">Ready to Play!</p>
+            <p className="text-[var(--muted)] text-xs">Transitioning to game...</p>
           </div>
         )}
       </div>
