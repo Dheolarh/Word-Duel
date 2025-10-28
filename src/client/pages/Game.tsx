@@ -7,7 +7,7 @@ import { ImageWithFallback } from '../components/fallback/ImageWithFallback';
 import { Timer } from '../components/Timer';
 import { TurnTimer } from '../components/TurnTimer';
 import { Board } from '../components/Board';
-import { Keyboard } from '../components/Keyboard';
+import GameKeyboard from '../components/GameKeyboard';
 import { EnemyGuessRow } from '../components/EnemyGuessRow';
 import { EndGameModal } from '../components/EndGameModal';
 import { WaitingModal } from '../components/WaitingModal';
@@ -664,7 +664,7 @@ export function Game({
 
       {/* Keyboard */}
       <div className="w-full px-2 pb-1.5 flex justify-center">
-        <Keyboard
+        <GameKeyboard
           onKeyPress={handleKeyPress}
           onEnter={handleEnter}
           onDelete={handleDelete}
