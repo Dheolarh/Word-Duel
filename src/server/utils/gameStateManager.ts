@@ -727,6 +727,19 @@ export class GameStateManager {
       throw new Error('Not your turn');
     }
     
+    // Validate that enough time has passed to justify skipping turn
+    // This prevents rapid turn skipping and double turns
+    const lastActivity = await redis.get(`player_activity:${gameId}:${playerId}`);
+    const now = Date.now();
+    const minTurnTime = 5000; // Minimum 5 seconds before allowing turn skip
+    
+    if (lastActivity) {
+      const lastActivityTime = parseInt(lastActivity);
+      if (now - lastActivityTime < minTurnTime) {
+        throw new Error('Cannot skip turn so quickly');
+      }
+    }
+    
     // Switch to opponent's turn
     const opponentPlayer = gameState.player1.id === playerId ? gameState.player2 : gameState.player1;
     gameState.currentPlayer = opponentPlayer.id;
@@ -738,5 +751,66 @@ export class GameStateManager {
     await this.saveGameStateAtomic(gameId, gameState);
     
     return { gameState };
+  }
+
+  /**
+   * Handle player quitting a multiplayer game
+   */
+  static async quitGame(
+    gameId: string, 
+    playerId: string
+  ): Promise<{ gameState: GameState } | null> {
+    const gameState = await RedisDataAccess.getGameState(gameId);
+    
+    if (!gameState) {
+      throw new Error('Game not found');
+    }
+    
+    if (gameState.status !== 'active') {
+      throw new Error('Game is not active');
+    }
+    
+    if (gameState.mode !== 'multi') {
+      return null; // Only for multiplayer games
+    }
+    
+    // Determine winner (opponent wins when player quits)
+    const opponentPlayer = gameState.player1.id === playerId ? gameState.player2 : gameState.player1;
+    
+    // End the game with opponent as winner
+    gameState.status = 'finished';
+    gameState.winner = gameState.player1.id === opponentPlayer.id ? 'player1' : 'player2';
+    
+    // Add definitions for both players' secret words
+    gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+    gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+    
+    // Update statistics for quit scenario
+    if (!gameState.statisticsUpdated) {
+      await this.updateQuitStatistics(gameState, playerId);
+      gameState.statisticsUpdated = true;
+    }
+    
+    // Save updated game state
+    await this.saveGameStateAtomic(gameId, gameState);
+    
+    return { gameState };
+  }
+
+  /**
+   * Handle quit statistics update
+   */
+  private static async updateQuitStatistics(
+    gameState: GameState,
+    quittingPlayerId: string
+  ): Promise<void> {
+    const winningPlayer = gameState.player1.id === quittingPlayerId ? gameState.player2 : gameState.player1;
+    const quittingPlayer = gameState.player1.id === quittingPlayerId ? gameState.player1 : gameState.player2;
+    
+    // Update winner stats (gets full win points)
+    await this.updatePlayerStats(winningPlayer, true, gameState);
+    
+    // Update quitting player stats (gets loss points)
+    await this.updatePlayerStats(quittingPlayer, false, gameState);
   }
 }

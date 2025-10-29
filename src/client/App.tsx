@@ -213,7 +213,25 @@ export const App = () => {
     setCurrentPage('pregame');
   };
 
-  const handleExitGame = () => {
+  const handleExitGame = async () => {
+    // If it's a multiplayer game and still active, call quit API
+    if (gameConfig?.isMultiplayer && gameConfig.gameId && gameConfig.gameState?.status === 'active') {
+      try {
+        await fetch(`/api/quit-game/${gameConfig.gameId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            playerId: userProfile?.userId || sessionId,
+          }),
+        });
+      } catch (error) {
+        console.error('Error quitting game:', error);
+        // Continue with exit even if quit API fails
+      }
+    }
+    
     setGameConfig(null);
     setCurrentPage('dashboard');
   };

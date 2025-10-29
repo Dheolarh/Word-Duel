@@ -1057,6 +1057,86 @@ router.post('/api/skip-turn/:gameId', async (req, res) => {
   }
 });
 
+// Quit game endpoint for multiplayer games
+router.post('/api/quit-game/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { playerId: rawPlayerId } = req.body;
+    const playerId = resolvePlayerId(rawPlayerId as string);
+    
+    if (!gameId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Game ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    if (!playerId) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Player ID is required',
+        'VALIDATION_ERROR'
+      ));
+    }
+    
+    // Validate game access
+    const hasAccess = await GameStateManager.validateGameAccess(gameId, playerId);
+    if (!hasAccess) {
+      return res.status(403).json(formatResponse(
+        undefined,
+        'Access denied to this game',
+        'GAME_ERROR'
+      ));
+    }
+    
+    const result = await GameStateManager.quitGame(gameId, playerId);
+    
+    if (!result) {
+      return res.status(400).json(formatResponse(
+        undefined,
+        'Cannot quit game at this time',
+        'GAME_ERROR'
+      ));
+    }
+    
+    res.json(formatResponse({
+      gameState: result.gameState,
+      quit: true,
+      reason: 'player_quit'
+    }));
+    
+  } catch (error) {
+    console.error('Quit game error:', error);
+    
+    // Handle specific game errors
+    if (error instanceof Error) {
+      if (error.message === 'Game not found') {
+        return res.status(404).json(formatResponse(
+          undefined,
+          'Game not found',
+          'GAME_ERROR'
+        ));
+      }
+      
+      if (error.message === 'Game is not active') {
+        return res.status(400).json(formatResponse(
+          undefined,
+          'Game is not active',
+          'GAME_ERROR'
+        ));
+      }
+    }
+    
+    res.status(500).json(formatResponse(
+      undefined,
+      'Failed to quit game',
+      'SERVER_ERROR',
+      true
+    ));
+  }
+});
+
 // Enhanced multiplayer game state endpoint with automatic cleanup
 router.get('/api/get-multiplayer-game/:gameId', async (req, res) => {
   try {

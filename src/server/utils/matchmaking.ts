@@ -36,10 +36,51 @@ export class MatchmakingManager {
     // Clean up expired entries first
     await this.cleanupExpiredEntries(queueKey);
     
+    // Validate that the current player is not already in a game
+    const existingGameId = await this.getPlayerGame(request.playerId);
+    if (existingGameId) {
+      // Player is already in a game, remove the mapping and continue
+      await this.removePlayerGame(request.playerId);
+    }
+    
     // Try to find an existing player in the queue
     const waitingPlayer = await this.findMatch(queueKey, request);
     
     if (waitingPlayer) {
+      // Validate that the waiting player is still valid (not in another game)
+      const waitingPlayerGameId = await this.getPlayerGame(waitingPlayer.playerId);
+      if (waitingPlayerGameId) {
+        // Waiting player is already in a game, remove them from queue and try again
+        await this.removeFromQueue(queueKey, waitingPlayer.playerId);
+        await this.removePlayerGame(waitingPlayer.playerId);
+        
+        // Try to find another match
+        const anotherWaitingPlayer = await this.findMatch(queueKey, request);
+        if (!anotherWaitingPlayer) {
+          // No other valid players, add current player to queue
+          await this.addToQueue(queueKey, request);
+          return {
+            gameId: '',
+            gameState: {} as GameState,
+            matched: false
+          };
+        }
+        
+        // Use the new waiting player
+        const gameId = generateGameId();
+        const gameState = await this.createMultiplayerGame(
+          gameId,
+          anotherWaitingPlayer,
+          request
+        );
+        
+        return {
+          gameId,
+          gameState,
+          matched: true
+        };
+      }
+      
       // Create multiplayer game with both players
       const gameId = generateGameId();
       const gameState = await this.createMultiplayerGame(
@@ -250,7 +291,7 @@ export class MatchmakingManager {
   }
 
   /**
-   * Check if a player has been matched to a game
+   * Get the game ID for a player (if they're in a game)
    */
   static async getPlayerGame(playerId: string): Promise<string | null> {
     const result = await redis.get(`player_game:${playerId}`);
@@ -258,7 +299,7 @@ export class MatchmakingManager {
   }
 
   /**
-   * Remove player-to-game mapping
+   * Remove player-game mapping
    */
   static async removePlayerGame(playerId: string): Promise<void> {
     await redis.del(`player_game:${playerId}`);
