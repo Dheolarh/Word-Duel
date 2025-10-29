@@ -1,0 +1,1965 @@
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "1db83f1f-27ee-4542-9b85-6535a6740985",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "1db83f1f-27ee-4542-9b85-6535a6740985",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "4046a7c6-34a9-496d-867d-d60478de9112",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "4046a7c6-34a9-496d-867d-d60478de9112",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "4c038f5c-ae89-42b9-9c44-a83e19e28f94",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "4c038f5c-ae89-42b9-9c44-a83e19e28f94",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "bbff9ecc-e311-4a78-8c9d-774f89405277",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "bbff9ecc-e311-4a78-8c9d-774f89405277",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "3875ca11-eacc-4d01-9203-03e5ecd88471",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "3875ca11-eacc-4d01-9203-03e5ecd88471",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "d44909ff-98cf-4717-b8c0-8afdecce03f6",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "d44909ff-98cf-4717-b8c0-8afdecce03f6",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "5e48e735-81a6-4e36-b986-ec20f93b7943",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "5e48e735-81a6-4e36-b986-ec20f93b7943",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "1b0af8ab-c991-4f0f-bd56-0d1dbbccf254",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "1b0af8ab-c991-4f0f-bd56-0d1dbbccf254",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "5addb268-b33b-485e-8064-27cff0d2cee4",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "5addb268-b33b-485e-8064-27cff0d2cee4",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "47db77c6-2f0e-4bfe-b89f-5f2e559453fc",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "47db77c6-2f0e-4bfe-b89f-5f2e559453fc",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "24b0f5b8-a51b-485b-bbcb-dd92130b3c4c",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "24b0f5b8-a51b-485b-bbcb-dd92130b3c4c",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de0e0639-0c44-4950-9e17-d6b4a699dca3",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de0e0639-0c44-4950-9e17-d6b4a699dca3",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "3482576a-c848-4995-af31-8970bf95a4ec",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "3482576a-c848-4995-af31-8970bf95a4ec",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "49e3ae9d-4145-4a42-8372-33ca32e0198c",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "49e3ae9d-4145-4a42-8372-33ca32e0198c",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "f65f4edf-ccad-4a98-8ac1-9f9d94ba99ff",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "f65f4edf-ccad-4a98-8ac1-9f9d94ba99ff",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "eae7dde5-d4ce-484c-b2e8-e27a7cdb185b",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "eae7dde5-d4ce-484c-b2e8-e27a7cdb185b",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "589801ca-7f1e-41a5-858a-f0a6e2979220",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "589801ca-7f1e-41a5-858a-f0a6e2979220",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "fd334ab2-4317-4fcf-93c5-42bc1dce9d82",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "fd334ab2-4317-4fcf-93c5-42bc1dce9d82",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "00967915-53f4-4782-86df-d54146e31912",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "00967915-53f4-4782-86df-d54146e31912",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "67123d03-759e-4c2e-be4e-79088debfd1b",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "67123d03-759e-4c2e-be4e-79088debfd1b",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8c922ffb-fb3c-4e25-a4a1-3f326447446b",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8c922ffb-fb3c-4e25-a4a1-3f326447446b",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "932ebc1c-6ded-4b6b-897a-cb834278f982",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "932ebc1c-6ded-4b6b-897a-cb834278f982",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "e4b2e1eb-3691-44db-94ec-1e1ddeb11270",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "e4b2e1eb-3691-44db-94ec-1e1ddeb11270",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "38a305bd-477d-4574-b284-9e4b332c044f",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "38a305bd-477d-4574-b284-9e4b332c044f",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "649b0272-98d1-4c18-84bc-01f1e78b3e6e",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "649b0272-98d1-4c18-84bc-01f1e78b3e6e",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "026af838-b248-44b8-9d8c-69b0dcbb00e7",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "026af838-b248-44b8-9d8c-69b0dcbb00e7",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de4f4194-f305-4231-951e-7b4339c0c0c4",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de4f4194-f305-4231-951e-7b4339c0c0c4",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "970c86b6-74c9-4fd3-aec3-2d7f6961e657",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "970c86b6-74c9-4fd3-aec3-2d7f6961e657",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "d7f88ab0-c971-4d58-81e0-8a25caa8b35d",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "d7f88ab0-c971-4d58-81e0-8a25caa8b35d",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:34   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "42d7dc77-58e4-4b1b-9852-4e105903ff2f",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+workbench.desktop.main.js:523 [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "42d7dc77-58e4-4b1b-9852-4e105903ff2f",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c83ee4b2-509c-4c9d-b560-f99dec926f65",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c83ee4b2-509c-4c9d-b560-f99dec926f65",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "48f54558-d9b2-4806-953c-f54be191fa5b",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "48f54558-d9b2-4806-953c-f54be191fa5b",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de73bb08-d5f1-40c4-bebc-733251ef7e0a",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "de73bb08-d5f1-40c4-bebc-733251ef7e0a",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "da4e3882-2820-4f1a-9f3f-5844cdd8f734",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "da4e3882-2820-4f1a-9f3f-5844cdd8f734",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c8112295-5b85-45d2-a872-06260a6d0321",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c8112295-5b85-45d2-a872-06260a6d0321",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8900aba3-72fa-496e-9cde-18883c59cd01",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8900aba3-72fa-496e-9cde-18883c59cd01",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8180f0b2-4e35-46fa-a35b-660d4a9c8de4",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "8180f0b2-4e35-46fa-a35b-660d4a9c8de4",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "427198fb-9ba8-4487-b0fe-e71ae0d16537",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "427198fb-9ba8-4487-b0fe-e71ae0d16537",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "eb2740fe-b733-43bf-bdc0-2b72b18d68b8",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "eb2740fe-b733-43bf-bdc0-2b72b18d68b8",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "f592b41f-c843-4101-93ac-4bc136b0f042",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "f592b41f-c843-4101-93ac-4bc136b0f042",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "6d373d92-9e8f-4cbb-a0e6-147fe4770a89",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "6d373d92-9e8f-4cbb-a0e6-147fe4770a89",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "7b70e594-241b-4adf-9adf-0a3ed07de855",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "7b70e594-241b-4adf-9adf-0a3ed07de855",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "48a3b6dc-eb7e-478e-bbd7-9eecf2a03241",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "48a3b6dc-eb7e-478e-bbd7-9eecf2a03241",
+    "messageType": "config/getSerializedProfileInfo"
+  }
+}
+
+Error: No handler for message type "config/getSerializedProfileInfo"
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "193ba886-45e4-4a07-850b-f07c4f251248",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "193ba886-45e4-4a07-850b-f07c4f251248",
+    "messageType": "getAutonomyMode"
+  }
+}
+
+Error: command 'kiroAgent.getAutonomyMode' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+   ERR [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c8d088a4-1acf-4402-acc4-40025a87c420",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:34
+error @ workbench.desktop.main.js:11475
+Xms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
+ [Extension Host] Error handling webview message: {
+  "msg": {
+    "messageId": "c8d088a4-1acf-4402-acc4-40025a87c420",
+    "messageType": "updateCoachingStatus",
+    "data": {
+      "coachType": "policy",
+      "shown": true
+    }
+  }
+}
+
+Error: command 'kiroAgent.updateCoachingStatus' not found
+Yms @ workbench.desktop.main.js:523
+$logExtensionHostMessage @ workbench.desktop.main.js:523
+S @ workbench.desktop.main.js:11500
+Q @ workbench.desktop.main.js:11500
+M @ workbench.desktop.main.js:11500
+L @ workbench.desktop.main.js:11500
+(anonymous) @ workbench.desktop.main.js:11500
+C @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:29
+fire @ workbench.desktop.main.js:550
+l.onmessage @ workbench.desktop.main.js:11511
