@@ -5,7 +5,7 @@
 **Word Duel** is a real-time, multiplayer 1v1 word-guessing game built on the Devvit platform for Reddit.
 The objective is for a player to guess their opponent's secret word before the opponent guesses theirs.
 The game supports both Player-vs-Player and Player-vs-AI modes.
-Both Players(either PVP or PVsAI) guess words concurrently to assume the first person to guess the opponent word wins (it is not a turn by turn guess system)
+Both Players(either PVP or PVsAI) guess words turn by turn to assume the first person to guess the opponent word wins (it is not a turn by turn guess system)
 
 - **Platform:** Reddit (via Devvit)
 - **Game Type:** Word Puzzle, Strategy
