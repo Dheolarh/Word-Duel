@@ -10,7 +10,7 @@ interface TurnTimerProps {
 export function TurnTimer({ isVisible, onTimeUp, isPaused = false, duration = 30 }: TurnTimerProps) {
   const [timeLeft, setTimeLeft] = useState(duration);
 
-  // Reset timer when visibility changes
+  // Reset timer when visibility or duration changes
   useEffect(() => {
     if (isVisible) {
       setTimeLeft(duration);
@@ -18,27 +18,30 @@ export function TurnTimer({ isVisible, onTimeUp, isPaused = false, duration = 30
   }, [isVisible, duration]);
 
   useEffect(() => {
-    if (!isVisible || isPaused) {
-      return;
-    }
+    if (!isVisible || isPaused) return;
 
-    if (timeLeft <= 0) {
-      onTimeUp();
-      return;
-    }
+    let cancelled = false;
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
-        const newTime = Math.max(0, prev - 1);
-        if (newTime === 0) {
-          onTimeUp();
+        const next = Math.max(0, prev - 1);
+        if (next === 0 && !cancelled) {
+          cancelled = true;
+          try {
+            onTimeUp();
+          } catch (e) {
+            console.error('TurnTimer onTimeUp threw an error', e);
+          }
         }
-        return newTime;
+        return next;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [timeLeft, onTimeUp, isPaused, isVisible]);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [isVisible, isPaused, onTimeUp]);
 
   if (!isVisible) {
     return null;

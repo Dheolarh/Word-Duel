@@ -706,7 +706,8 @@ export class GameStateManager {
    */
   static async skipTurnDueToTimeout(
     gameId: string, 
-    playerId: string
+    playerId: string,
+    force: boolean = false
   ): Promise<{ gameState: GameState } | null> {
     const gameState = await RedisDataAccess.getGameState(gameId);
     
@@ -728,16 +729,33 @@ export class GameStateManager {
     }
     
     // Validate that enough time has passed to justify skipping turn
-    // This prevents rapid turn skipping and double turns
+    // This prevents rapid turn skipping and double turns. If 'force' is true
+    // (client reports timer expired), bypass the minTurnTime check to ensure
+    // the turn advances immediately.
     const lastActivity = await redis.get(`player_activity:${gameId}:${playerId}`);
     const now = Date.now();
     const minTurnTime = 5000; // Minimum 5 seconds before allowing turn skip
-    
-    if (lastActivity) {
-      const lastActivityTime = parseInt(lastActivity);
-      if (now - lastActivityTime < minTurnTime) {
-        throw new Error('Cannot skip turn so quickly');
+
+    // Debug logging: record lastActivity, current time, computed difference, and force flag
+    try {
+      const lastActivityTime = lastActivity ? parseInt(lastActivity) : null;
+      const diff = lastActivityTime ? now - lastActivityTime : null;
+      console.log(`[DEBUG] skipTurnDueToTimeout game=${gameId} player=${playerId} force=${force} now=${now} lastActivity=${lastActivityTime} diff=${diff}`);
+    } catch (e) {
+      console.warn('[DEBUG] Failed to log skipTurnDueToTimeout debug info', e);
+    }
+
+    if (!force) {
+      if (lastActivity) {
+        const lastActivityTime = parseInt(lastActivity);
+        if (now - lastActivityTime < minTurnTime) {
+          console.warn(`Skip prevented: only ${now - lastActivityTime}ms since last activity (min ${minTurnTime}ms)`);
+          throw new Error('Cannot skip turn so quickly');
+        }
       }
+    } else {
+      // Log forced skip for debugging/audit
+      console.log(`Forced skip requested for game ${gameId} by player ${playerId}`);
     }
     
     // Switch to opponent's turn

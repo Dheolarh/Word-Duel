@@ -9,6 +9,11 @@ interface TimerProps {
 export function Timer({ initialTime, onTimeUp, isPaused = false }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
 
+  // Keep internal time in sync if the parent provides a new initialTime
+  useEffect(() => {
+    setTimeLeft(initialTime);
+  }, [initialTime]);
+
   useEffect(() => {
     if (timeLeft <= 0) {
       onTimeUp?.();

@@ -304,7 +304,7 @@ export function Game({
     try {
       // Use playerId prop for multiplayer actions
       const playerIdToUse = playerId;
-      
+      // Include a force flag to indicate this call happens because the client's turn timer expired
       const response = await fetch(`/api/skip-turn/${gameId}`, {
         method: 'POST',
         headers: {
@@ -312,6 +312,7 @@ export function Game({
         },
         body: JSON.stringify({
           playerId: playerIdToUse,
+          force: true,
         }),
       });
 
@@ -373,6 +374,42 @@ export function Game({
       console.error('Error triggering AI guess:', error);
       setIsWaitingForOpponent(false);
       // Don't show error modal for timing failures
+    }
+  };
+
+  // Finalize game on timer expiry — ask server to mark the game finished immediately
+  const finalizeGame = async () => {
+    try {
+      const playerIdToUse = isMultiplayer ? playerId : 'current-user';
+      const response = await fetch(`/api/finalize-game/${gameId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId: playerIdToUse }),
+      });
+
+      const data = await response.json();
+
+      if (data && data.success && data.data) {
+        const newGameState = data.data.gameState || data.gameState;
+        if (newGameState) {
+          setGameState(newGameState);
+          // Populate score breakdown if returned by server
+          if (data.data.scoreBreakdown) {
+            setScoreBreakdown(data.data.scoreBreakdown);
+          } else if (data.scoreBreakdown) {
+            setScoreBreakdown(data.scoreBreakdown);
+          }
+          updateGameStatus(newGameState);
+          setIsWaitingForOpponent(false);
+          return;
+        }
+      }
+
+      // Fallback to local lose state if server call didn't return usable data
+      setGameStatus('lose');
+    } catch (error) {
+      console.error('Failed to finalize game on server:', error);
+      setGameStatus('lose');
     }
   };
 
@@ -587,7 +624,7 @@ export function Game({
                 0,
                 Math.floor((gameState.timeLimit - (Date.now() - gameState.startTime)) / 1000)
               )}
-              onTimeUp={() => setGameStatus('lose')}
+              onTimeUp={finalizeGame}
               isPaused={isPaused}
             />
           </div>
@@ -698,8 +735,8 @@ export function Game({
           isMultiplayer={isMultiplayer}
         />
 
-        {/* End game modal */}
-        {gameStatus !== 'playing' && (
+        {/* End game modal - only show after server reports finished to avoid missing data */}
+        {gameStatus !== 'playing' && gameState?.status === 'finished' && (
           <EndGameModal
             result={gameStatus === 'win' ? 'win' : gameStatus === 'lose' ? 'lose' : 'draw'}
             opponentWord={opponentWord}

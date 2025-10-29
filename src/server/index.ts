@@ -4,7 +4,8 @@ import { redis, reddit, createServer, context, getServerPort } from '@devvit/web
 import { createPost } from './core/post';
 import { assignAnonName } from './utils/anonNames';
 import { RedisDataAccess, formatResponse } from './main';
-import { isValidWordFormat } from './utils/gameUtils';
+import { isValidWordFormat, determineWinner } from './utils/gameUtils';
+import { getDefinition } from './services/dictionaryApi';
 import { validateWordWithDictionary } from './services/dictionaryApi';
 import { GameStateManager } from './utils/gameStateManager';
 import { initializeWordLists } from './utils/aiOpponent';
@@ -618,6 +619,70 @@ router.post('/api/ai-guess/:gameId', async (req, res) => {
   }
 });
 
+// Finalize game endpoint - mark a game finished due to timeout and return final state
+router.post('/api/finalize-game/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const { playerId: rawPlayerId } = req.body || {};
+    const playerId = resolvePlayerId(rawPlayerId as string);
+
+    if (!gameId) {
+      return res.status(400).json(formatResponse(undefined, 'Game ID is required', 'VALIDATION_ERROR'));
+    }
+
+    if (!playerId) {
+      return res.status(400).json(formatResponse(undefined, 'Player ID is required', 'VALIDATION_ERROR'));
+    }
+
+    // Validate game access
+    const hasAccess = await GameStateManager.validateGameAccess(gameId, playerId);
+    if (!hasAccess) {
+      return res.status(403).json(formatResponse(undefined, 'Access denied to this game', 'GAME_ERROR'));
+    }
+
+    const gameState = await RedisDataAccess.getGameState(gameId);
+    if (!gameState) {
+      return res.status(404).json(formatResponse(undefined, 'Game not found', 'GAME_ERROR'));
+    }
+
+    // Only finalize active games
+    if (gameState.status !== 'active') {
+      return res.status(400).json(formatResponse(undefined, 'Game is not active', 'GAME_ERROR'));
+    }
+
+    // If multiplayer, reuse existing force-end helper which handles stats and cleanup
+    if (gameState.mode === 'multi') {
+      const finished = await GameStateManager.forceEndMultiplayerGame(gameId, 'timeout');
+      if (!finished) {
+        return res.status(500).json(formatResponse(undefined, 'Failed to finalize multiplayer game', 'SERVER_ERROR', true));
+      }
+
+      return res.json(formatResponse({ gameState: finished }));
+    }
+
+    // Single player: mark finished, determine winner, attach definitions and save
+    gameState.status = 'finished';
+    gameState.winner = determineWinner(gameState);
+    try {
+      gameState.player1.secretWordDefinition = getDefinition(gameState.player1.secretWord) || 'a word';
+    } catch (e) {
+      gameState.player1.secretWordDefinition = 'a word';
+    }
+    try {
+      gameState.player2.secretWordDefinition = getDefinition(gameState.player2.secretWord) || 'a word';
+    } catch (e) {
+      gameState.player2.secretWordDefinition = 'a word';
+    }
+
+    await RedisDataAccess.saveGameState(gameId, gameState);
+
+    return res.json(formatResponse({ gameState }));
+  } catch (error) {
+    console.error('Finalize game error:', error);
+    return res.status(500).json(formatResponse(undefined, 'Failed to finalize game', 'SERVER_ERROR', true));
+  }
+});
+
 // Get AI timing endpoint
 router.get('/api/ai-timing/:difficulty', async (req, res) => {
   try {
@@ -973,8 +1038,15 @@ router.post('/api/force-end-game/:gameId', async (req, res) => {
 router.post('/api/skip-turn/:gameId', async (req, res) => {
   try {
   const { gameId } = req.params;
-  const { playerId: rawPlayerId } = req.body;
+  const { playerId: rawPlayerId } = req.body || {};
   const playerId = resolvePlayerId(rawPlayerId as string);
+
+  // Debug: log incoming skip-turn payload to help diagnose force flag issues
+  try {
+    console.log(`[DEBUG] /api/skip-turn payload for game ${gameId}:`, req.body);
+  } catch (e) {
+    console.warn('[DEBUG] Failed to log /api/skip-turn payload', e);
+  }
     
     if (!gameId) {
       return res.status(400).json(formatResponse(
@@ -1002,7 +1074,8 @@ router.post('/api/skip-turn/:gameId', async (req, res) => {
       ));
     }
     
-    const result = await GameStateManager.skipTurnDueToTimeout(gameId, playerId);
+  const { force } = req.body || {};
+  const result = await GameStateManager.skipTurnDueToTimeout(gameId, playerId, !!force);
     
     if (!result) {
       return res.status(400).json(formatResponse(
